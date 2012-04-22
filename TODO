@@ -1,0 +1,723 @@
+BLOCKING FEATURES / BUGS -------------------------------------------------
+
+Edit rate is embarrassingly low.
+  - only low when bot is checking links
+  - though this is the expected steady-state
+
+TESTING ------------------------------------------------------------------
+
+bot exclusion:
+  quote [[User talk:Jaguar]]:
+    {{bots|deny=DPL bot|deny=MadmanBot|deny=CorenSearchBot|deny=BlevintronBot}}
+  fixed
+
+At least two bad edits due to URLs that end with right-paren )
+  done
+
+send_message_to: redirect
+  - temporary fix: just refuse them
+
+maintain a list of special cases for weird templates.
+  table driven placement of {{Dead link}} or {{Wayback}}
+  compromise: BOYCOTT_TEMPLATES, TAG_AFTER_TEMPLATES
+  done
+  puts tags /after/ {{URL}}
+    done
+
+history
+  skip false introductions that might happen around revert edits.
+  I wrote some code.  Hard to test a heisenbug
+  see failure-cases
+    fixed that case
+
+TABLED -------------------------------------------------------------------
+
+cantor set 500+content
+  - take an in-depth look at all known 500s, to see if there
+    are any simple heuristics to distinguish these cases.
+
+only send notifications if the links were not fixed after a week.
+  ? maybe interesting
+  ? is it worth the trouble?
+
+webcitation query urls => permalinks
+
+check if users have replied to notifications
+  - and forward that response to bot operator.
+
+look for wikibreak templates on the user page?
+
+exponential backoff on API retries
+  flat backoff is fine for now
+
+send_message_to:
+  - redirects in User Talk pages.
+    looks like: #REDIRECT [[Some other page]]
+
+history
+  - Can we trace past an article move?
+
+subst/transclude subject lines
+
+collect list of articles with common typos.  post those somewhere.
+  then, I can go in as an editor and make those edits to build
+  good faith
+
+cleanup: remove some stupid, dated, half-baked ideas
+  - host stats
+  - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
+  - soft-start limit on questionable links
+  - upload source code
+
+Merge source code into a single page, or
+Move source code to another publishing site:
+  might require a new means to censor the password
+
+save all items from previous_edits to a data page somewhere.
+
+has the time arrived for multiple processes?
+  - I don't think so.
+  In preparation for that eventuality, I might want to:
+    partition the database so that two processes may save it
+    independently.
+clean up:
+  DB internal state
+    - if it's saved to the file, hide it.
+
+excessive number of bad links:
+  - a policy to automatically cull:
+    1. un-fixable links
+      DONE
+    2. the oldest links
+  from @bad when it exceeds a certain size.
+
+Measure bandwidth usage:
+  total up/down
+  insecure wikipedia up/down
+  secure wikipedia up/down
+
+In/out monthly bandwidth limits
+
+Statistics:
+  - total distinct, non-bot users contacted
+  - total distinct, non-bot users who blocked us
+  - total distince, non-bot users who opt-in via UserTalk/BotName
+  --> Can these be evaluated offline?
+
+Reverted?
+  Can we use size-of-edit to help? e.g. +142, -142
+
+Stats:
+  - numSolicitations which ultimately got us blocked...
+
+Make DB.save scale better.
+  Problem: @bad is huge.
+  Clean solutions:
+    - submit those edits to wikipedia ;)
+        - this is waiting on the bugs above
+    - throttle the link-checking task if there
+      are too many items in @bad.
+        - I'd prefer to not do that until editing is happening
+          at a natural rate...
+    - fragment @bad somehow?  by date of insertion?
+    - make @bad records simpler/smaller?
+      article => [url, [trialdate, result]]
+
+Make DB.save faster
+    - (one time) cull those links from @bad which
+      we won't be able to fix for the foreseeable future.
+        - specifically, redirect links.
+        - this should drop the size of bad.yaml to about 40% ~~ 3MB
+   - save less frequently.
+
+list of user agents during link checks
+  - select one randomly.
+
+proxies
+  Optional HTTP Proxy for scraping wikipedia
+  Optional List of HTTP Proxies for checking links
+  Optional HTTP Proxy for editing wikipedia
+
+
+DONE ---------------------------------------------------------------------------
+
+Fix bug where URI extraction sometimes gobbles a trailing comma or close fence.
+  done
+
+Ensure that the URI is not already tagged with {{Dead link}}, {{404}}, {{dl}}, {{dead}}, or {{broken link}}
+or the idiomatic: [Wikipedia Main Page]. Archived from [the original] on 2005-07-06. Retrieved 2002-09-30.
+  - done
+
+Only save when database changed
+  - done
+
+Sleep longer when nothing to do
+  - done
+
+refactor database into two halves
+  - persistent
+  - transient
+  DONE
+
+add a link-check-schedule to the transient half.
+  DONE
+
+refactor the idle wait logic:
+  - implement next_scrape_time, next_edit_time, next_check_link_time
+  DONE
+
+Group ready-links by (scheme, host, port) to reduce network overheads.
+  - DONE
+
+Combine subsequent link_checks with a common (scheme,host,port) into
+a single connection
+  DONE
+
+Adjust db.next_check_link_time
+  - make it wait until at least N links are
+    ready to check
+    DONE
+
+Fragment the database
+  - it takes ~15 seconds to save!
+  - separate:
+    - robots.txt / domain info
+    - known bad links
+    - questionable links
+      - bin these according to (date of discovery).day % N
+        this makes sense because, typically, we only
+        modify (link.check!) those links which we discovered
+        today, today-LINK_TRIAL_PERIOD, today-2*LINK_TRIAL_PERIOD...
+  - maintain independent dirty bits for each, save
+    each only when necessary.
+  DONE
+
+Optional http.open_timeout override during link.check.
+  not done - doesn't work
+  Fixed
+
+Per-domain information
+  - num good links, num bad links, num redirect links...
+    DONE
+
+Make sure we are performing the right kind of
+connection for a given URL scheme.
+  - pretty sure it is not...
+  think it works now.
+
+HTTP 405 errors for imdb.com, amazon.com
+  --> that the server does not support HTTP HEAD for dynamic requests
+      --> Need to fall-back to HTTP GET in these cases.
+
+
+
+Purge the 405s, https entries from bad.yaml
+  done
+
+Better parsing of robots.txt
+  - handle the * wildcard in patterns
+  - handle the $ anchor in patterns
+  - handle very malformed ones which include scheme://host:port/path
+  DONE
+
+tools to help me move over to live.
+  a FAKE_SELECT option, which will
+    hard-code the pages to scan, if defined.
+  DONE
+
+
+throttling:
+  max edits per day
+    DONE
+  max links corrected in a single edit
+    DONE
+
+
+Fix bug where URI extraction sometimes gobbles a trailing comma or close fence.
+  done
+
+
+Editing articles:
+  - Select an article to edit.
+    DONE
+  - Fetch latest revision id, body.
+    DONE
+  - Scrape URLs from the body.
+    DONE
+  - Check each of those URLs in the database.
+    - Fix broken links
+      DONE
+    - Fix redirects
+      Sort of done.
+  - Submit edit to wikipedia
+    DONE
+  - Mark changes as completed.
+    DONE
+  - Mark database as changed.
+    DONE
+
+throttling:
+  min edit period per article
+    DONE
+  update next_edit_time to take all these factors into account
+    DONE
+
+track my edits:
+  - periodically check for reverts
+    ('Undid revision ... by M ...', 'Reverted ... by M ...', 'Reverting ... by M ...')
+    - report the reverted edit to the bot's operator
+
+don't send messages to users with bot exclusions
+ on their User: or User_talk: pages.
+  DONE
+
+
+be smart about <nowiki> in markup.rb
+  DONE
+
+broken links:
+  - search revision history to find the revision which introduced the link
+    DONE
+  - use this additional information to search archives
+    DONE
+  - failing that, write a note to the user who introduced the link
+    DONE
+
+Find articles in archives
+  - when date is available
+    - DONE but not frequently successful...
+  - when date is not available
+    - try to infer date from revision history?
+      DONE
+
+refactor constants.rb, config.rb
+  - ideally, draw-out a simpler configuration file
+  DONE
+
+Automatically upload my source code to wikipedia
+  - censor any string that matches BOT_PASSWORD ;)
+
+Don't ever write user-talk messages to bot accounts.
+  DONE
+
+Parsing
+  - URLs in html-style comments <!-- http://foo-->
+  - URLs that end with ;
+  --> I'm getting sick of this.  Need a technical spec
+      for how wiki text is parsed.
+
+optionally write messages to logfile instead of stderr
+
+nohup
+  - change output to logfile
+
+Make DB.save faster.
+  - replace YAML with something else.
+    - Marshal - fastest
+      - but its binary :O yaml is soooo nice for debugging...
+    - JSON - still much faster than yaml
+  DONE - Marshal, with fallback to yaml.
+
+URL extraction
+  urls within italics or bold: ''http://www.google.com'' or '''http://www.google.com'''
+
+Fix the few buggy edits, as seen under edits/def-broken and edits/maybe-broken
+  - see User_talk:Blevintron/sandbox/test9
+
+Stats:
+  - numEdits
+    done
+  - numRevertedEdits
+    done
+  - numNonRevertedEdits
+    done
+  - numSolicitations
+    done
+
+Marshal bug:
+  One of the exception types cannot be serialized... execution expired.
+    - Fixed for new observations.
+  What about old observations?
+    - Fixed.  it sucked.
+
+some of my http sessions are closing prematurely
+  - api
+  - history
+  :: Ruby's Net::HTTP will only honor KeepAlive if you
+    manually start the connection before a request.
+    Implicit start => implicit close.
+
+solicitation message:
+  fix grammar in opening sentence
+  list of link-check dates:
+    - no leading zero on day of month
+    - put a conjunction before the last date.  x, y, and z
+  DONE
+
+Limit:
+  total solicitations/day
+  (this is implicitly limited to MAX_EDITS_PER_DAY * MAX_LINKS_PER_EDIT)
+  -- no longer true with the experiment?
+    - Still true so long as @numEditsOnLastDay is updated independently of do_edit.
+
+Experiment:
+  Four cases:
+    - don't edit;
+    - edit, but don't send solicitations;
+    - don't edit, but send solicitations;
+    - edit and send solicitations.
+    (DONE)
+
+  For each case, measure:
+    - Number of times the links have been fixed
+      "Productive"
+    - Number of times the recipient of a solicitation later edited that article
+      "Encourages participation"
+    - Number of times our edit was reverted
+      "Annoyance I"
+    - Number of times the recipient of the solicitation blocked further messages
+      "Annoyance II"
+    - Number of times the bot was blocked from that page via {{bots|deny}}
+      "Annoyance III"
+    (DONE)
+
+  This means that, for my edits, I must also keep track of:
+    - Which case of the experiment
+    - Whether this edit represents a valid data point, or if some
+      external error occurred (e.g. network error while submitting edit)
+    - Whether solicitations were sent.
+    - The solicitations [recipient, revisionid]
+    (DONE)
+
+  Save stats in database
+    (DONE)
+
+Limit:
+  solicitations/user/day
+  DONE
+
+Experiment
+  Post stats to wikipedia
+  DONE
+
+test0
+  - A broken link is ALREADY marked at one location, but
+    not yet marked in another location.
+  - scraping discovers the broken link (because there is at least
+    one location where it is not marked)
+  - editing dumbly marks all occurrences with {{broken link}}
+  - result: one occurrence is double-marked.
+  DONE
+
+throttling via max-lag
+  maxlag https://www.mediawiki.org/wiki/Manual:Maxlag_parameter
+  - scrape DONE
+  - edit DONE
+  - reverts DONE
+
+Test the experiment scraping code!
+  first round: I don't think it will crash in the common case.
+  DONE
+
+Metrics
+  Total Participation should exclude bot edits
+  DONE
+
+gzip accept-encoding for all communications to wikipedia...
+  DONE
+
+Each user may have a User_talk:foo/BrokenLinks page
+  - if it exists, add solicitations there.
+  - and don't limit messages/day in that case
+  DONE
+
+Carefully word solicitations
+  - make it clear we are not accusing them
+  - make it clear that these things happen over time.
+  - make it clear that we think the link was good at some time.
+
+Double-check archive links before returning them
+  with HTTP HEAD
+  done
+
+Update the emergency shutdown feature to work with wikipedia's standard...
+  - wikipedia standard is to block
+
+Search webcitation.org
+  done
+
+Max message/user/day => min time between contacting user
+  done
+
+Can we do more to reduce the quantity of user-talk messages?
+  - a hard-limit is less than ideal.
+  - merging ?
+If we would refuse to send a solicitation because of the max-mesg-per-user-per-day limit,
+then postpone that edit instead of neglecting the solicitation.
+  done
+  Needs cleanup
+
+no limit on links/edit
+  done
+
+edit summary character limit.
+  done
+
+broken link ->  dead link
+  done
+
+the retrieve api:
+  consistent ordering of the cookie and http_in parameters.
+      DONE
+  perform the http.start just before the first connection, not
+    during reconnect.
+      DONE
+
+meta-redirects?
+  404, with body to meta-redirect?
+    DONE
+
+Checking links
+  reconnect if 'end of file reached'
+    (means that the server claimed keep-alive, but closed connection)
+general code cleanup
+  - update Link::check! to use retrieve_head
+  DONE
+
+clean up:
+  replace Net::HTTP constructions with
+    retrieve_page
+    retrieve_article
+    retrieve_revision
+    reconnect <-- this one's important
+  DONE
+
+find a best-guess replacement link in archives, and add that to
+  the {{broken link}} template
+  (wayback, webite)
+  done
+
+Fix bug where article title has non-ascii characters
+  done
+
+can we infer access dates within <ref>?
+  look for 'Accessed ...' or 'Retrieved ...' idioms
+    IMPLEMENTED
+      looks good (Raymond Collishaw)
+
+"Mark Hopkins (Educator)" has two {{Wayback}}s in a row
+  because the the broken url appeared twice in @bad!
+    IMPLEMENTED
+      looks good
+
+does the link already have an archive specified with {{Wayback}} or {{WebCite}}
+  IMPLEMENTED
+  not sure if effective, since I don't really have an idea of
+  how people use these 'in the wild'
+
+{{template}} parsing
+  templates may be nested.
+    each_template:
+      just because a template precedes the occurrence, does not mean there
+      is no outer template to enclose both.
+  write a testcase
+  "The Mysterons (Captain Scarlet episode)"
+  IMPLEMENTED
+    looks good
+
+do the right thing when a 404 redirects
+  - no longer confident of edit.
+    done
+
+generate solicitation messages from a template; store that template as a page
+in user space.
+  not actually very hard...
+  done
+
+Don't replace links inside weird templates.
+  done
+
+Collect additional stats:
+  distinct contributing links           / edit
+  occurrences marked                    / edit
+  occurrences archived                  / edit
+  occurrences not fixed                 / edit
+  distinct editors who added dead links / edit
+  solicitations sent                    / edit
+    done
+
+Automatically replace links with archive copy if
+  an archive copy is available with date error +/- 1 month.
+    IMPLEMENTED.
+  cases for bare or bracket link (with or without title) within <ref>
+    IMPLEMENTED
+  needs thorough testing.
+    DONE
+
+{{Use dmy dates}}, {{Dmy}}, {{Use mdy dates}}, {{Mdy}}
+  done
+
+Kill experiment case -E+S
+  too confusing, since the bot won't mention
+  the links that are automatically fixed.
+    DONE
+
+Template.substitute_within! was chomping one extra char after the template
+  - caused a bug in "The Bloody Chamber"
+  - fixed
+
+Do not at bot= to citation, cite web, wayback, webcite templates.
+  done
+
+Don't add version number to |bot=
+  done
+
+The day first (df=yes) parameter of Wayback.
+  done
+
+Edit case (2):  <ref> http://bare.link/in/ref </ref>
+  infer better titles
+  moot. that case is bad.
+
+now that I don't add |bot= to most templates, will
+the improvement metric still work?
+  should be fine.  {{Dead link}} still gets |bot=
+
+diagnose 100% cpu usage during scrape.
+  Seems to happen on large articles, such as
+    Baku
+    List of Danish football transfers summer 2008
+  make faster
+    most of the time is spent in String.index, String.rindex
+      within is_comment...
+        okay, index is fast, rindex is slow.  Fixed.
+    bottleneck is now index
+      remove unparsed markup once at top of each_template.
+      consolidate this_use_marked_dead? with this_use_has_archive_copy
+        good.
+  ''List of...'' went from 9 minutes to 27 seconds.  good enough.
+
+infer preferred date format from examples in doc.
+  done
+    few articles have this dmy/mdy specs
+
+White space around template parameters.
+  maybe fixed
+  looks promising.
+
+ruby -w
+  ./markup.rb:157: warning: ambiguous first argument; put parentheses or even spaces
+  ./markup.rb:159: warning: ambiguous first argument; put parentheses or even spaces
+  ./markup.rb:407: warning: ambiguous first argument; put parentheses or even spaces
+  ./nobots.rb:188: warning: ambiguous first argument; put parentheses or even spaces
+  ./template.rb:308: warning: method redefined; discarding old redact_from!
+  ./edit.rb:447: warning: ambiguous first argument; put parentheses or even spaces
+  ./edit.rb:514: warning: ambiguous first argument; put parentheses or even spaces
+  ./edit.rb:515: warning: ambiguous first argument; put parentheses or even spaces
+  ./archive.rb:36: warning: ambiguous first argument; put parentheses or even spaces
+  ./retrieve.rb:74: warning: ambiguous first argument; put parentheses or even spaces
+  ./retrieve.rb:108: warning: (...) interpreted as grouped expression
+  ./retrieve.rb:112: warning: (...) interpreted as grouped expression
+  ./retrieve.rb:147: warning: (...) interpreted as grouped expression
+  ./retrieve.rb:331: warning: ambiguous first argument; put parentheses or even spaces
+  ./source.rb:24: warning: useless use of >= in void context
+  DONE
+
+Multiple Solicitations (multiple articles) for one user
+  (try to combine several user messages into one)
+  moot, since users receive no more than one notification per week
+
+per edit:
+  - write the apology somewhere
+  - link to the apology in the edit summary.
+  moot.
+
+upon reverts
+  - further throttle edits for that article (avoid edit wars)
+    (or add {{bots |deny=BOT_NAME}} to the page)
+  - write apology note
+  moot.
+
+Why does bot randomly exit sometimes
+  - with no exception or anything, just exit during link check
+  moot. wrapper
+
+test9
+  - a URL with a space in it.
+  - {{cite ... | url=http://why.not/put a  space in it.pdf | archiveurl=foo}}
+  - should be excluded, because it has an archive URL.
+  - Not excluded, because the scraped URL is 'http://why.not/put',
+    and thus it doesn't match the url parameter to {{cite}}
+  ??Is it worth fixing this??
+  - This is such a ridiculously broken thing.  URLs don't have
+    (unescaped) spaces.  Even wikipedia doesn't parse it correctly.
+  fuck it.
+
+transitive subst: when composing messages.
+  done
+
+more ruby lint tools?
+  no duds.
+
+send_message_to:
+  - don't send to inactive users, i.e. no contrib in last 6 months.
+  DONE
+
+trial limit on number of notifications
+  DONE
+
+timeouts for link checking-
+  - just up the timeout to 45 seconds.
+  done
+
+use the assert user/bot bits in the edit api request
+  already done.
+
+all those calls to retrieve_page within api
+are reconnecting, since the INSECURE_API_URL doesn't match
+the connection
+  fix that.
+  DONE
+
+editing a <ref> with multiple external links
+  place the tag after the appropriate link.
+  done
+  looks good.
+
+compress the edit logs
+  done
+
+edit summaries:
+  'Added archive url for' => 'Add archive for'
+  'Added archive link' => 'Add archive'
+  'Marked broken link' => 'Mark dead link'
+  'Marked a dead link' => 'Mark dead link'
+  'Marked dead links' => 'Mark dead links'
+  done
+
+POSTPONE before re-sending does not work
+  (I'm seeing the message 'too soon to send to this user again)
+  - maybe fixed
+  done
+
+open science data non-broken link
+  check
+
+only upload experiment stats if they have changed
+  done
+
+work on the notification message.
+  - make it more explicit that you're a bot
+    done
+  - avoid first person pronoun
+    done
+  - update signature, make the 'Bot' part bold and a different color.
+    meh
+
+
+throttling:
+  min age of an article in @bad (quiescence)
+    and update next_edit_time
+      done
+
+

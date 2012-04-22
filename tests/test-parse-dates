@@ -1,0 +1,42 @@
+#!/usr/bin/ruby
+
+require 'db'
+
+dates = [
+  '9 Mar 2012',
+  '9 March 2012',
+  '9 Mar, 2012',
+  '9 March, 2012',
+  '9 mar 2012',
+  '9 march 2012',
+  '9 mar, 2012',
+  '9 march, 2012',
+  'Mar 9 2012',
+  'Mar 9, 2012',
+  'March 9 2012',
+  'March 9, 2012',
+  'mar 9 2012',
+  'mar 9, 2012',
+  'march 9 2012',
+  'march 9, 2012',
+  '2012 Mar 9',
+  '2012 March 9',
+  '2012 mar 9',
+  '2012 march 9',
+  '2012-3-9',
+  '{{Start date|1993}} returns "1993"',
+  '{{Start date|1993|02}} returns "February 1993"',
+  '{{Start date|1993|02|24}} returns "February 24, 1993"',
+  '{{Start date|1993|02|24|08|30}} returns "08:30, February 24, 1993"',
+  '{{Start date|1993|02|24|08|||+01:00}} returns "February 24, 1993 (+01:00)"',
+  '{{Start date|1993|02|24|08|||-07:00}} returns "February 24, 1993 (-07:00)" ',
+  '{{Start date|1993|02|24|08|30|23}} returns "08:30:23, February 24, 1993"',
+  '{{Start date|1993|02|24|08|30|23|Z}} returns "08:30:23, February 24, 1993 (UTC)"',
+  '{{Start date|1993|02|24|08|30|23|+01:00}} returns "08:30:23, February 24, 1993 (+01:00)"',
+  '{{Start date|1993|02|24|08|30|23|-07:00}} returns "08:30:23, February 24, 1993 (-07:00)"',
+  ]
+
+dates.each do |dstr|
+  puts dstr
+  puts "  #{try_parse_date dstr}"
+end

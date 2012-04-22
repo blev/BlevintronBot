@@ -1,0 +1,28 @@
+#!/usr/bin/ruby
+
+require 'db'
+require 'rubygems'
+require 'ruby-prof'
+
+bad_pages = [
+  'List of Danish football transfers summer 2008',
+  'Baku',
+  'List of Brigham Young University alumni',
+  ]
+
+bad_pages.each do |article|
+  page,date = retrieve_article article
+
+  t = Time.now
+  result = RubyProf.profile do
+    scrape_article page
+  end
+  $stderr.puts "Parsing #{article} took #{Time.now-t} seconds"
+
+  File.open "profile.#{ article.gsub(/\s/, '_') }.out", 'w' do |fout|
+    printer = RubyProf::GraphPrinter.new result
+    printer.print fout
+  end
+end
+
+

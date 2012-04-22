@@ -1,0 +1,57 @@
+
+## Description: installation instructions
+
+(0) Required software:
+    I've tested this on Ruby 1.8.7.
+    I've tested this on Ubuntu 9-ish
+    It expects that the standard unix utilities
+      'cat', 'diff', 'gzip', 'tar' are installed.
+        (assume that tar accepts the -j (bzip2) and --remove-files flag.)
+    If you wish to handle CAPTCHAs
+      (i.e. with CAPTCHA_USER_TIMEOUT>0),
+      then you need an image viewer.  By default,
+      the command is 'eog'.  Look at the
+      option IMAGE_VIEWER_APP in config-advanced.rb
+
+(1) Get all of the source into a single directory.
+
+(2) (Optional) Edit config-simple.rb, config-advanced.rb
+
+(3) Set a username, password.
+
+  The bot looks for a file named DB_DIR/passwords.rb (DB_DIR is a constant defined in config-simple.rb)
+
+  This file should contain three lines:
+    BOT_USERNAME = the wikipedia username for the bot account.
+    BOT_PASSWORD = the password for the bot account.
+    OPERATOR_USERNAME = the wikipedia username of the bot's operator.
+
+(3) You must create a few pages in the Bot's User space:
+
+    User:#{BOT_USERNAME}/Bot/Shutdown
+ 
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/Hello
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/Revision
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/Link
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/EndRevision
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/Goodbye
+    User:#{BOT_USERNAME}/Bot/Madlibs/2/OptOut
+
+  (the Madlibs are pieces of the messages sent to
+   users.  Look under user BlevintronBot for examples)
+
+(4) Start the bot: ./wiki-badlink-bot.rb
+
+  You might need to chmod +x wiki-badlink-bot.rb
+
+(5) Wait a long time.
+
+  The bot will scrape and check links for about five days before it even tries
+  to perform an edit.
+
+(6) To shut the bot down: hit CTRL-C or send it SIGINT.
+
+  The bot will try to shutdown cleanly... This should
+  take less than 30 seconds.
+
+

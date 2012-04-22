@@ -1,0 +1,20 @@
+#!/usr/bin/ruby
+
+require 'db'
+
+histo = retrieve_history 'R.E.M.'
+
+histo.each do |revid, revtime, revuser, revsummary|
+  revert,id,user = looks_like_revert? revsummary
+
+  if revert
+    print "Revert("
+    print "##{id}," if id
+    print "#{user}" if user
+    print "): "
+  else
+    print "NO: "
+  end
+
+  puts revsummary
+end

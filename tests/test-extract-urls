@@ -1,0 +1,93 @@
+#!/usr/bin/ruby
+
+require 'markup'
+
+$log=$stderr
+
+tests = [
+  [ " http://en.wikipedia.org/.", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/,", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/],", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/].", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/),", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/).", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/,)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/.)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/,]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/.]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/;)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/;)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/;]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/;]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/:)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/:)", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/:]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/:]", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org/')", "http://en.wikipedia.org/'" ],
+  [ " http://en.wikipedia.org/')", "http://en.wikipedia.org/'" ],
+  [ " http://en.wikipedia.org/']", "http://en.wikipedia.org/'" ],
+  [ " http://en.wikipedia.org/']", "http://en.wikipedia.org/'" ],
+  [ " http://en.wikipedia.org/-)", "http://en.wikipedia.org/-" ],
+  [ " http://en.wikipedia.org/-)", "http://en.wikipedia.org/-" ],
+  [ " http://en.wikipedia.org/-]", "http://en.wikipedia.org/-" ],
+  [ " http://en.wikipedia.org/-]", "http://en.wikipedia.org/-" ],
+  [ " <pre> http://en.wikipedia.org </pre>", nil ],
+  [ " <nowiki> http://en.wikipedia.org </nowiki>", nil ],
+  [ " <!-- http://en.wikipedia.org --> ", nil ],
+  [ " <pre> <!-- http://en.wikipedia.org --> </pre>", nil ],
+  [ " <nowiki> <!-- http://en.wikipedia.org --> </nowiki>", nil ],
+  [ " 'http://en.wikipedia.org/'", "http://en.wikipedia.org/'" ],
+  [ " ''italics http://en.wikipedia.org/''", "http://en.wikipedia.org/" ],
+  [ " '''bold http://en.wikipedia.org/'''", "http://en.wikipedia.org/" ],
+  [ " http://en.wikipedia.org''Title''", "http://en.wikipedia.org" ],
+  [ " http://en.wikipedia.org/''Title''", "http://en.wikipedia.org/" ],
+  [ " ''italics http://en.wikipedia.org/'''", "http://en.wikipedia.org/'" ],
+  [ " '''italics http://en.wikipedia.org/''", "http://en.wikipedia.org/" ],
+  [ " ''italics http://en.wikipedia.org/''.", "http://en.wikipedia.org/" ],
+  [ " '''bold http://en.wikipedia.org/'''.", "http://en.wikipedia.org/" ],
+  [ " ''italics http://en.wikipedia.org/.''", "http://en.wikipedia.org/" ],
+  [ " '''bold http://en.wikipedia.org/.'''", "http://en.wikipedia.org/" ],
+  [ " '''bold ''italics http://en.wikipedia.org/''.'''", "http://en.wikipedia.org/" ],
+  [ " ''italics '''bold http://en.wikipedia.org/'''.''", "http://en.wikipedia.org/" ],
+]
+
+tests.each do |input, output|
+  urls = scrape_article input
+
+  error = nil
+
+  if output == nil
+    unless urls.empty?
+      error = " expected: no URLs but got #{ urls.join ' , ' }"
+    end
+  else
+    if urls.size != 1
+      error = " expected one URL: #{output} ; got #{ urls.join ' , ' }"
+    elsif urls.first != output
+      error = " expected #{output} but got #{urls.first}"
+    end
+  end
+
+  if error
+    puts "Error"
+    puts " input #{input}"
+    puts error
+  end
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+

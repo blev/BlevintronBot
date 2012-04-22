@@ -1,0 +1,35 @@
+#!/usr/bin/ruby
+
+ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
+FORWARD_PATTERN = ')))))'
+REVERSE_PATTERN = '((((('
+
+def random_string n
+  s = ''
+  s << REVERSE_PATTERN
+  n.times do
+    s << ALPHABET[ rand( ALPHABET.size )]
+  end
+  s << FORWARD_PATTERN
+  s
+end
+
+N=10000
+TRIALS=100000
+
+big_string = random_string N
+
+
+start = Time.now
+TRIALS.times do
+  big_string.index FORWARD_PATTERN
+end
+stop = Time.now
+puts "Forward: #{stop-start} seconds"
+
+start = Time.now
+TRIALS.times do
+  big_string.rindex REVERSE_PATTERN, big_string.size-1
+end
+stop = Time.now
+puts "Reverse: #{stop-start} seconds"

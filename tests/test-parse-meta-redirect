@@ -1,0 +1,22 @@
+#!/usr/bin/ruby
+
+require 'db'
+
+uglies = [
+  [ "< meTA\nhttp-equiV = \"location'\n content='http://www.google.com/foo'      / >",        'http://www.google.com/foo'],
+  [ "< meTA\n\n content='http://www.google.com/foo'   http-equiv=\"location\" \n\n\n  / >",   'http://www.google.com/foo'],
+  [ "< meTA\nhttp-equiV = \"refresh'\n content='5; http://www.google.com/foo'      / >",      'http://www.google.com/foo'],
+  [ "< meTA\nhttp-equiV = \"refresh'\n content='5; url =http://www.google.com/foo'      / >", 'http://www.google.com/foo'],
+  [ "< META\n \n content='5; url =http://www.google.com/foo'   HTTP-EQUIV='refresh'   / >",   'http://www.google.com/foo'],
+  ]
+
+uglies.each do |input,output|
+  loc = parse_meta_redirect input
+  if loc == output
+    puts "Good"
+  else
+    puts "Failure: #{input}"
+    puts "Expected: #{output}"
+    puts "Observed: #{loc}"
+  end
+end
