@@ -314,21 +314,30 @@ def remove_trailing_junk url
   # Ruby's URI::extract follows the spec precisely, and
   # allows URIs which contain closing braces ] and commas.
   #
-  # However, in wikitext grammar, URLs never end
-  # in comma, period, or a closed fence.
-  #
+
+  # See [[Help_talk:URL##Can_someone_clarify_link_behavior_with_parenthesis.3F]]
+  # And MediaWiki source code for makeFreeExternalLink() at http://tinyurl.com/bpnj48w
+  # lines 1238--1243
 
   while true
     next if url.chomp! '.'
     next if url.chomp! ','
-    unless url.include? '('
-      next if url.chomp! ')'
-    end
-    next if url.chomp! ']'
+    next if url.chomp! '\\'
+    next if url.chomp! '!'
+    next if url.chomp! '?'
     next if url.chomp! ';'
     next if url.chomp! ':'
 
+    unless url.include? '('
+      next if url.chomp! ')'
+    end
+
     # Ugly, context-sensitive cases
+
+    # This happens when Ruby's URI::extract sees
+    # a bracket link
+    next if url.chomp! ']'
+
     #           document               =>    URI.extract              =>     corrected
     #    ''http://en.wikipedia.org/''  => http://en.wikipedia.org/''  => http://en.wikipedia.org
     #   '''http://en.wikipedia.org/''' => http://en.wikipedia.org/''' => http://en.wikipedia.org

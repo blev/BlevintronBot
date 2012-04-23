@@ -6,16 +6,8 @@ Edit rate is embarrassingly low.
 
 TESTING ------------------------------------------------------------------
 
-bot exclusion:
-  quote [[User talk:Jaguar]]:
-    {{bots|deny=DPL bot|deny=MadmanBot|deny=CorenSearchBot|deny=BlevintronBot}}
-  fixed
-
 At least two bad edits due to URLs that end with right-paren )
   done
-
-send_message_to: redirect
-  - temporary fix: just refuse them
 
 maintain a list of special cases for weird templates.
   table driven placement of {{Dead link}} or {{Wayback}}
@@ -23,12 +15,6 @@ maintain a list of special cases for weird templates.
   done
   puts tags /after/ {{URL}}
     done
-
-history
-  skip false introductions that might happen around revert edits.
-  I wrote some code.  Hard to test a heisenbug
-  see failure-cases
-    fixed that case
 
 TABLED -------------------------------------------------------------------
 
@@ -714,10 +700,23 @@ work on the notification message.
   - update signature, make the 'Bot' part bold and a different color.
     meh
 
-
 throttling:
   min age of an article in @bad (quiescence)
     and update next_edit_time
       done
+
+history
+  skip false introductions that might happen around revert edits.
+  I wrote some code.  Hard to test a heisenbug
+  see failure-cases
+    fixed that case
+
+send_message_to: redirect
+  - temporary fix: just refuse them
+
+bot exclusion:
+  quote [[User talk:Jaguar]]:
+    {{bots|deny=DPL bot|deny=MadmanBot|deny=CorenSearchBot|deny=BlevintronBot}}
+  fixed
 
 
