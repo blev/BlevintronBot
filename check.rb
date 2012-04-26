@@ -207,11 +207,6 @@ private
       scrape_dirty!
       @numRedirects += 1
 
-      if MAINTAIN_HOST_STATS
-        @host_stats[ link.host ] ||= HostStats.new
-        @host_stats[ link.host ].num_redirects += 1
-      end
-
       # Add to bad, group by article.
       link.articles.each do |article|
         @bad[article] ||= []
@@ -225,32 +220,17 @@ private
       scrape_dirty!
       @numOkLinks += 1
 
-      if MAINTAIN_HOST_STATS
-        @host_stats[ link.host ] ||= HostStats.new
-        @host_stats[ link.host ].num_ok += 1
-      end
-
     elsif link.is_good_enough?
       remove_from_fragments link
 
       scrape_dirty!
       @numGoodEnoughLinks += 1
 
-      if MAINTAIN_HOST_STATS
-        @host_stats[ link.host ] ||= HostStats.new
-        @host_stats[ link.host ].num_good_enough += 1
-      end
-
     elsif link.is_bad?
       remove_from_fragments link
 
       scrape_dirty!
       @numBad += 1
-
-      if MAINTAIN_HOST_STATS
-        @host_stats[ link.host ] ||= HostStats.new
-        @host_stats[ link.host ].num_bad += 1
-      end
 
       # Add to bad, group by article
       link.articles.each do |article|

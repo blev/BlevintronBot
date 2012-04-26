@@ -62,14 +62,6 @@ OVERRIDE_HTTP_CONNECT_TIMEOUT = 45.seconds
 # a batch.
 BATCH_LINK_WILLING_TO_WAIT = 60.seconds
 
-# ------------- Statistics
-
-# Should I maintain per-host statistics about
-# the number of good/bad/redirect links?
-# If false, this will clear the host stats upon
-# load!
-MAINTAIN_HOST_STATS = false
-
 # ------------- Throttling
 
 # There are two reasons to throttle.

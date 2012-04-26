@@ -26,18 +26,6 @@ require 'source'
 
 $log ||= $stderr
 
-class HostStats
-  def initialize
-    @num_ok = 0
-    @num_good_enough = 0
-    @num_redirects = 0
-    @num_bad = 0
-  end
-
-  attr_accessor :num_ok, :num_good_enough
-  attr_accessor :num_redirects, :num_bad
-end
-
 def save_object obj, filename
   format = SAVE_DB_FORMAT
 
@@ -143,7 +131,6 @@ class DB
       @numOkLinks = 0
       @numGoodEnoughLinks = 0
 
-      @host_stats = {}
       @experiment_stats = {}
       @solicits_per_user = {}
 
@@ -163,11 +150,6 @@ class DB
       @numArticlesVisited = scrapedb['numArticlesVisited']
       @numOkLinks         = scrapedb['numOkLinks']
       @numGoodEnoughLinks = scrapedb['numGoodEnoughLinks']
-      if MAINTAIN_HOST_STATS
-        @host_stats       = scrapedb['host_stats']
-      else
-        @host_stats       = {}
-      end
 
       @lastEdit               = editdb['lastEdit']
       @numEditsOnLastDay      = editdb['numEditsOnLastDay']
@@ -262,7 +244,6 @@ class DB
         stats['numArticlesVisited'] = @numArticlesVisited
         stats['numOkLinks'] = @numOkLinks
         stats['numGoodEnoughLinks'] = @numGoodEnoughLinks
-        stats['host_stats'] = @host_stats
 
         save_object stats, "#{dir}/scrape-db"
       end

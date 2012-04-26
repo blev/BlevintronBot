@@ -10,6 +10,8 @@ Split the bot into two processes:
   editor / check reverts
   requires
     - split the database into disjoint halves
+      DONE
+    - split class DB into two different classes.
     - determine some way to communicate links across those halves
     - determine some way to share the $cancel variable across processes.
 
@@ -61,8 +63,8 @@ collect list of articles with common typos.  post those somewhere.
   then, I can go in as an editor and make those edits to build
   good faith
 
+
 cleanup: remove some stupid, dated, half-baked ideas
-  - host stats
   - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
   - soft-start limit on questionable links
   - upload source code
@@ -731,4 +733,7 @@ bot exclusion:
     {{bots|deny=DPL bot|deny=MadmanBot|deny=CorenSearchBot|deny=BlevintronBot}}
   fixed
 
+cleanup: remove some stupid, dated, half-baked ideas
+  - host stats
+    DONE
 
