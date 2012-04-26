@@ -212,11 +212,6 @@ MIN_STATS_UPLOAD_PERIOD = 1.days
 # Periodically save status here
 STATUS_ARTICLE = "User:#{ BOT_USERNAME }/Bot/Status"
 
-# Save my source code to wikipedia on bot startup
-SOURCE_CODE_BASE = "User:#{ BOT_USERNAME }/Bot/SourceCode"
-SOURCE_CODE_EXTENSIONS = [ '.txt', '.rb' ]
-MIN_SOURCE_CODE_UPLOAD_PERIOD = nil # disabled.
-
 # ---------------- The solicitation-effectiveness experiment.
 
 # To evaluate the effectiveness of the bot, it keeps separate

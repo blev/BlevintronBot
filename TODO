@@ -67,11 +67,6 @@ collect list of articles with common typos.  post those somewhere.
 cleanup: remove some stupid, dated, half-baked ideas
   - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
   - soft-start limit on questionable links
-  - upload source code
-
-Merge source code into a single page, or
-Move source code to another publishing site:
-  might require a new means to censor the password
 
 save all items from previous_edits to a data page somewhere.
 
@@ -736,4 +731,12 @@ bot exclusion:
 cleanup: remove some stupid, dated, half-baked ideas
   - host stats
     DONE
+
+cleanup: remove some stupid, dated, half-baked ideas
+  - upload source code
+Merge source code into a single page, or
+Move source code to another publishing site:
+  might require a new means to censor the password
+  DONE
+
 

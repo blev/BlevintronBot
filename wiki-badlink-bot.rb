@@ -93,8 +93,6 @@ def shutdown!
   $log.flush
 end
 
-$db.upload_source_code!
-
 edits_allowed = true
 until $cancel
 

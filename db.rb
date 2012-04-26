@@ -22,7 +22,6 @@ require 'edit'
 require 'nobots'
 require 'reverts'
 require 'scrape'
-require 'source'
 
 $log ||= $stderr
 
@@ -117,7 +116,6 @@ class DB
       @numNonRevertedEdits = 0
       @numSolicitations = 0
 
-      @lastSourceCodeUpload = Time.now - MIN_SOURCE_CODE_UPLOAD_PERIOD
       @lastStatsUpload = Time.now - MIN_STATS_UPLOAD_PERIOD
       @experiment_stats_dirty = true
 
@@ -157,7 +155,6 @@ class DB
       @numRevertedEdits       = editdb['numRevertedEdits']
       @numNonRevertedEdits    = editdb['numNonRevertedEdits']
       @numSolicitations       = editdb['numSolicitations']
-      @lastSourceCodeUpload   = editdb['lastSourceCodeUpload']
       @lastStatsUpload        = editdb['lastStatsUpload']
       @experiment_stats_dirty = editdb['experiment_stats_dirty']
       @experiment_stats       = editdb['experiment_stats']
@@ -258,7 +255,6 @@ class DB
         stats['lastEdit'] = @lastEdit
         stats['numEditsOnLastDay'] = @numEditsOnLastDay
         stats['numEdits'] = @numEdits
-        stats['lastSourceCodeUpload'] = @lastSourceCodeUpload
         stats['lastStatsUpload'] = @lastStatsUpload
         stats['experiment_stats_dirty'] = @experiment_stats_dirty
         stats['numRevertedEdits'] = @numRevertedEdits
