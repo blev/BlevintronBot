@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/ruby -w
 
 
 ## This file is part of BrokenLinkBot
@@ -14,7 +14,7 @@ require 'db'
 
 input_dir = DB_DIR
 output_dir = DB_DIR
-limit = 'r0123456789bsp'
+limit = 'r0123456789bSEp'
 
 i=0
 while i < ARGV.size
@@ -26,7 +26,7 @@ while i < ARGV.size
     output_dir = ARGV[i+1]
     i += 2
   when '-l'
-    limit = ARGV[i+1].downcase
+    limit = ARGV[i+1]
     i += 2
   else
     $stderr.puts "Usage: cvt-database-yaml.rb [-i inputdir] [-o outputdir] [-l limitstring]"
@@ -37,7 +37,8 @@ end
 db = DB.load input_dir
 
 db.robots_dirty! if limit.include? 'r'
-db.stats_dirty! if limit.include? 's'
+db.scrape_dirty! if limit.include? 'S'
+db.edit_dirty! if limit.include? 'E'
 db.bad_links_dirty! if limit.include? 'b'
 db.previous_edits_dirty! if limit.include? 'p'
 

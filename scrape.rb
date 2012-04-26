@@ -77,7 +77,7 @@ class DB
             # Statistics...
             @numArticlesVisited += 1
             @lastScrape = Time.now
-            stats_dirty!
+            scrape_dirty!
 
           rescue Exception => e
             $log.puts "Exception while parsing article #{article}: #{e}"

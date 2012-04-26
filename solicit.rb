@@ -101,7 +101,7 @@ private
       return true if (Time.now - last) < MIN_SOLICIT_PERIOD_PER_USER
 
       # That was a long time ago.
-      stats_dirty!
+      edit_dirty!
       @solicits_per_user.delete user
     end
     false
@@ -110,7 +110,7 @@ private
   # Keep track of how many solicitations I sent to each user
   # over a calendar day.
   def sent_a_solicitation! user
-    stats_dirty!
+    edit_dirty!
     @numSolicitations += 1
     @solicits_per_user[user] = Time.now
   end

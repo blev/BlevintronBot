@@ -4,6 +4,18 @@ Edit rate is embarrassingly low.
   - only low when bot is checking links
   - though this is the expected steady-state
 
+Split the bot into two processes:
+  scraper / link checker
+  vs
+  editor / check reverts
+  requires
+    - split the database into disjoint halves
+    - determine some way to communicate links across those halves
+    - determine some way to share the $cancel variable across processes.
+
+migrate to ruby 1.9 ?
+  - would give real threads.
+
 TESTING ------------------------------------------------------------------
 
 At least two bad edits due to URLs that end with right-paren )

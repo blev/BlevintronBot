@@ -232,7 +232,7 @@ private
 
     # Record edit stats which may throttle future edits
     # (even though we don't know if they will be performed / succeed)
-    stats_dirty!
+    edit_dirty!
     @numEditsOnLastDay = numEditsToday + 1
     @lastEdit = Time.now
 
@@ -272,7 +272,7 @@ private
             $log.puts " -> Edit successful"
             this_edit.new_revision_id = revid
 
-            stats_dirty!
+            edit_dirty!
             @numEdits += 1
 
             # Remove those problem links which have been completely fixed.

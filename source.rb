@@ -14,7 +14,7 @@ class DB
 
     do_upload_source_code @lastSourceCodeUpload
 
-    stats_dirty!
+    edit_dirty!
     @lastSourceCodeUpload = Time.now
   end
 

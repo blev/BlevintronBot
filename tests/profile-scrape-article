@@ -8,6 +8,7 @@ bad_pages = [
   'List of Danish football transfers summer 2008',
   'Baku',
   'List of Brigham Young University alumni',
+  '1998 FIFA World Cup qualification (UEFA)',
   ]
 
 bad_pages.each do |article|

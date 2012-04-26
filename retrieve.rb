@@ -36,7 +36,7 @@ HTTP_RETRY_ERRORS = ['Connection reset by peer', 'end of file reached', 'Broken 
 HTTP_IDEMPOTENT_RETRY_ERRORS = HTTP_RETRY_ERRORS + ['wrong status line']
 
 # A set of errors for which retry cannot help
-HTTP_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known']
+HTTP_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known'] #consider this: , 'Connection timed out - connect(2)']
 
 # MediaWikia API errors
 API_RETRY_ERRORS = ['unknownerror', 'ratelimited', 'readonly', 'hookaborted']

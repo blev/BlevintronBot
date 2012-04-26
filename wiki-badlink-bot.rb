@@ -86,7 +86,8 @@ trap "USR1" do
 end
 
 def shutdown!
-  $db.print_stats
+  $db.print_scrape_stats
+  $db.print_edit_stats
   File.delete PID_FILE
   $log.puts "Shutdown: #{Time.now}"
   $log.flush
@@ -97,7 +98,8 @@ $db.upload_source_code!
 edits_allowed = true
 until $cancel
 
-  $db.print_stats
+  $db.print_scrape_stats
+  $db.print_edit_stats
 
   # Keep CPU, Network utilization low
   $db.wait

@@ -112,8 +112,8 @@ end
 
 
 class DB
-  def initialize(robots = nil, frags = nil, bads = nil, prevs = nil, stats = nil)
-    if stats == nil
+  def initialize(robots = nil, frags = nil, bads = nil, prevs = nil, scrapedb = nil, editdb = nil)
+    if scrapedb == nil
 
       @fragments = Array.new(NUM_FRAGMENTS) { Hash.new }
       @bad = {}
@@ -156,35 +156,30 @@ class DB
 
       @previous_edits     = prevs
 
-      @first_run_time     = stats['first_run_time']
-
-      @lastScrape         = stats['lastScrape']
-      @lastEdit           = stats['lastEdit']
-      @numEditsOnLastDay  = stats['numEditsOnLastDay']
-      @numEdits           = stats['numEdits']
-
-      @numRevertedEdits   = stats['numRevertedEdits']
-      @numNonRevertedEdits= stats['numNonRevertedEdits']
-      @numSolicitations   = stats['numSolicitations']
-
-      @lastSourceCodeUpload = stats['lastSourceCodeUpload']
-      @lastStatsUpload    = stats['lastStatsUpload']
-      @experiment_stats_dirty = stats['experiment_stats_dirty']
-
-      @numBad             = stats['numBad']
-      @numRedirects       = stats['numRedirects']
-      @numArticlesVisited = stats['numArticlesVisited']
-      @numOkLinks         = stats['numOkLinks']
-      @numGoodEnoughLinks = stats['numGoodEnoughLinks']
-
+      @first_run_time     = scrapedb['first_run_time']
+      @lastScrape         = scrapedb['lastScrape']
+      @numBad             = scrapedb['numBad']
+      @numRedirects       = scrapedb['numRedirects']
+      @numArticlesVisited = scrapedb['numArticlesVisited']
+      @numOkLinks         = scrapedb['numOkLinks']
+      @numGoodEnoughLinks = scrapedb['numGoodEnoughLinks']
       if MAINTAIN_HOST_STATS
-        @host_stats       = stats['host_stats']
+        @host_stats       = scrapedb['host_stats']
       else
-        @host_stats  = {}
+        @host_stats       = {}
       end
 
-      @experiment_stats   = stats['experiment_stats']
-      @solicits_per_user  = stats['solicits_per_user']
+      @lastEdit               = editdb['lastEdit']
+      @numEditsOnLastDay      = editdb['numEditsOnLastDay']
+      @numEdits               = editdb['numEdits']
+      @numRevertedEdits       = editdb['numRevertedEdits']
+      @numNonRevertedEdits    = editdb['numNonRevertedEdits']
+      @numSolicitations       = editdb['numSolicitations']
+      @lastSourceCodeUpload   = editdb['lastSourceCodeUpload']
+      @lastStatsUpload        = editdb['lastStatsUpload']
+      @experiment_stats_dirty = editdb['experiment_stats_dirty']
+      @experiment_stats       = editdb['experiment_stats']
+      @solicits_per_user      = editdb['solicits_per_user']
 
       not_dirty!
     end
@@ -203,9 +198,10 @@ class DB
       end
       bads = load_object "#{dir}/bad"
       prevs = load_object "#{dir}/previous_edits"
-      stats = load_object "#{dir}/stats"
 
-      return DB.new(robots, frags, bads, prevs, stats)
+      scrapedb = load_object "#{dir}/scrape-db"
+      editdb = load_object "#{dir}/edit-db"
+      return DB.new(robots, frags, bads, prevs, scrapedb, editdb)
 
     rescue Exception => e
       $log.puts "Error loading database from file: #{e}"
@@ -253,8 +249,8 @@ class DB
       end
 
       # Save statistics, etc
-      if stats_dirty?
-        $log.print 's'
+      if scrape_dirty?
+        $log.print 'S'
         # This is a sloppy mess. clean it up.
         stats = {}
 
@@ -267,6 +263,15 @@ class DB
         stats['numOkLinks'] = @numOkLinks
         stats['numGoodEnoughLinks'] = @numGoodEnoughLinks
         stats['host_stats'] = @host_stats
+
+        save_object stats, "#{dir}/scrape-db"
+      end
+
+      if edit_dirty?
+        $log.print 'E'
+
+        # This is a sloppy mess. clean it up.
+        stats = {}
 
         # These are used by the editing process.
         stats['lastEdit'] = @lastEdit
@@ -281,7 +286,7 @@ class DB
         stats['experiment_stats'] = @experiment_stats
         stats['solicits_per_user'] = @solicits_per_user
 
-        save_object stats, "#{dir}/stats"
+        save_object stats, "#{dir}/edit-db"
       end
 
       $log.puts " #{Time.now - start} seconds"
@@ -294,7 +299,7 @@ class DB
   end
 
   def clear_experiment_stats!
-    stats_dirty!
+    edit_dirty!
     @numEdits = 0
     @numEditsOnLastDay = 0
     @numRevertedEdits = 0
@@ -310,7 +315,8 @@ class DB
     @fragment_dirty = [true] * NUM_FRAGMENTS
     @bad_links_dirty = true
     @previous_edits_dirty = true
-    @stats_dirty = true
+    @scrape_dirty = true
+    @edit_dirty = true
   end
 
   def robots_dirty!
@@ -329,8 +335,20 @@ class DB
     @previous_edits_dirty = true
   end
 
-  def stats_dirty!
-    @stats_dirty = true
+  def edit_dirty!
+    @edit_dirty = true
+  end
+
+  def edit_dirty?
+    @edit_dirty
+  end
+
+  def scrape_dirty!
+    @scrape_dirty = true
+  end
+
+  def scrape_dirty?
+    @scrape_dirty
   end
 
   def experiment_stats_dirty!
@@ -360,9 +378,9 @@ class DB
     sleep_or_cancel delay
   end
 
-  def print_stats
+  def print_scrape_stats
     $log.puts "- - - - - - - - - - - - - - - - - -"
-    $log.puts "DB Stats #{Time.now}"
+    $log.puts "Scrape Stats #{Time.now}"
     $log.puts "- Visited #{ @numArticlesVisited } articles"
     $log.puts "- Found #{ sprintf "%7d", @numOkLinks         } good links         ; #{ sprintf "%.3f", (@numOkLinks.to_f / @numArticlesVisited) } per article"
     $log.puts "- Found #{ sprintf "%7d", @numBad             } bad links          ; #{ sprintf "%.3f", (@numBad.to_f / @numArticlesVisited) } per article"
@@ -389,10 +407,15 @@ class DB
     $log.puts " #{ sprintf "%2.3f", (100 * p_redir)}% of links are consistent redirects"
     $log.puts " #{ sprintf "%2.3f", (100 * p_enough)}% of links are good enough"
     $log.puts
+    $log.puts "- robots.txt cache: #{ @robotstxt.size }"
+    $log.puts "- - - - - - - - - - - - - - - - - -"
+  end
 
+  def print_edit_stats
+    $log.puts "- - - - - - - - - - - - - - - - - -"
+    $log.puts "Edit Stats #{Time.now}"
     $log.puts "- #{ @bad.size } articles have problem links and are waiting for edit."
     $log.puts "- Watching previous actions on #{ @previous_edits.size } articles"
-    $log.puts "- robots.txt cache: #{ @robotstxt.size }"
     $log.puts
     $log.puts "Edits contributed: #{@numEdits} total; performed #{numEditsToday} actions today."
 
@@ -423,7 +446,8 @@ private
     @fragment_dirty = [false] * NUM_FRAGMENTS
     @bad_links_dirty = false
     @previous_edits_dirty = false
-    @stats_dirty = false
+    @edit_dirty = false
+    @scrape_dirty = false
   end
 
   def robots_dirty?
@@ -442,7 +466,4 @@ private
     @previous_edits_dirty
   end
 
-  def stats_dirty?
-    @stats_dirty
-  end
 end

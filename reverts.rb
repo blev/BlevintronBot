@@ -244,13 +244,13 @@ class DB
       if past_edit.experiment_case.do_edit
         if reverted
           $log.puts "REVERTED by #{byWhom}."
-          stats_dirty!
+          edit_dirty!
           @numRevertedEdits += 1
           upon_revert past_edit, byWhom, revertRevId, why, messages_out
 
         else
           $log.puts "still there :)"
-          stats_dirty!
+          edit_dirty!
           @numNonRevertedEdits += 1
         end
       end
@@ -260,7 +260,7 @@ class DB
   end
 
   def do_upload_experiment
-    stats_dirty!
+    edit_dirty!
     @lastStatsUpload = Time.now
 
     latest,expdate = retrieve_article EXPERIMENT_ARTICLE
@@ -304,7 +304,7 @@ class DB
 private
 
   def add_stat key,name,val
-    stats_dirty!
+    edit_dirty!
     experiment_stats_dirty!
     @experiment_stats[key] ||= {}
     @experiment_stats[key][name] ||= Statistic.new

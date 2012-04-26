@@ -204,7 +204,7 @@ private
     if link.is_consistent_redirect?
       remove_from_fragments link
 
-      stats_dirty!
+      scrape_dirty!
       @numRedirects += 1
 
       if MAINTAIN_HOST_STATS
@@ -222,7 +222,7 @@ private
     elsif link.is_ok?
       remove_from_fragments link
 
-      stats_dirty!
+      scrape_dirty!
       @numOkLinks += 1
 
       if MAINTAIN_HOST_STATS
@@ -233,7 +233,7 @@ private
     elsif link.is_good_enough?
       remove_from_fragments link
 
-      stats_dirty!
+      scrape_dirty!
       @numGoodEnoughLinks += 1
 
       if MAINTAIN_HOST_STATS
@@ -244,7 +244,7 @@ private
     elsif link.is_bad?
       remove_from_fragments link
 
-      stats_dirty!
+      scrape_dirty!
       @numBad += 1
 
       if MAINTAIN_HOST_STATS
