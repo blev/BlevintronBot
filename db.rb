@@ -226,10 +226,6 @@ class Scraper
     @scrape_dirty = true
   end
 
-  def scrape_dirty?
-    @scrape_dirty
-  end
-
   def next_action_time
     [next_scrape_time, next_check_link_time].compact.min
   end
@@ -543,6 +539,10 @@ private
     @bad_links_dirty = false
     @previous_edits_dirty = false
     @scrape_dirty = false
+  end
+
+  def scrape_dirty?
+    @scrape_dirty
   end
 
   def bad_links_dirty?
