@@ -185,6 +185,7 @@ $log.puts "(C) 2012 Blevintron"
 $log.puts "This code is released under the CC-BY-SA 3.0 License.  See LICENSE.txt"
 $log.puts
 
+trap_signals
 save_pid PID_FILE
 
 scraper_pid = editor_pid = nil
