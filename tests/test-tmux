@@ -1,0 +1,162 @@
+#!/usr/bin/ruby -w
+
+require 'tmux'
+
+def write_shit fout
+  10.times do
+    s = test_string
+    until s.empty?
+      len = [21, s.size].min
+      prefix = s[0 ... len]
+      suffix = s[len .. -1]
+
+      fout << prefix
+      s = suffix
+    end
+  end
+  fout.flush
+end
+
+def test_string
+  s = <<EOM
+declared access date July 9, 2011
+Retrieving 'http://wayback.archive.org/web/2011*/http://www.ceclients.com/sites/StPetersburgYachtClub/files/Majorawards.pdf'... 404, Failed.
+Retrieving 'http://wayback.archive.org/web/2012*/http://www.ceclients.com/sites/StPetersburgYachtClub/files/Majorawards.pdf'... 404, Failed.
+Retrieving POST 'http://webcitation.org/query.php'... 200
+Retrieving 'http://webcitation.org/topframe.php'... 200
+Archive search took 0.545141 seconds
+    This article contains problem link: http://www.ceclients.com/sites/StPetersburgYachtClub/files/Majorawards.pdf
+      Trying to fix a 404 link
+IMPLICIT preferred date format: mdy
+
+We have reached max-edits for the trial period
+
+Edit took 5.183954 seconds
+
+* Next edit at Fri Apr 27 00:42:27 -0400 2012
+Pruning bad link pool 15757 -> 15756
+Saving database to persistent storage... r024S 1.215773 seconds
+Saving database to persistent storage... bE 3.904136 seconds
+- - - - - - - - - - - - - - - - - -
+Scrape Stats Fri Apr 27 00:42:04 -0400 2012
+- Visited 119588 articles
+- Found  325079 good links         ; 2.718 per article
+- Found   36289 bad links          ; 0.303 per article
+- Found   68706 redirect links     ; 0.575 per article
+- Found    4261 good-enough links  ; 0.036 per article
+- Found   13980 undecided links    ; 0.117 per article
+
+From these, I can estimate:
+ 9.130% of links are BAD
+ 17.286% of links are consistent redirects
+ 1.072% of links are good enough
+
+- robots.txt cache: 2682
+- - - - - - - - - - - - - - - - - -
+- - - - - - - - - - - - - - - - - -
+Edit Stats Fri Apr 27 00:42:04 -0400 2012
+- 15756 articles have problem links and are waiting for edit.
+- Watching previous actions on 250 articles
+
+Edits contributed: 526 total; performed 15 actions today.
+  (0 reverted : 276 not reverted == 0.000 revert rate)
+Total solicitations sent: 150
+
+Edits to live site: ENABLED
+- - - - - - - - - - - - - - - - - -
+
+* Next scrape at Fri Apr 27 00:41:02 -0400 2012
+* Next link-check at Fri Apr 27 00:41:45 -0400 2012 for 5 links
+sleeping 5 seconds
+Retrieving 'http://en.wikipedia.org/wiki/User:BlevintronBot/Bot/Shutdown?action=raw'... 200
+Selecting random articles...
+Retrieving 'http://en.wikipedia.org/w/api.php?action=query&list=random&rnlimit=10&format=xml&rnnamespace=0&maxlag=5'... 200
+Retrieving 'http://en.wikipedia.org/wiki/Valea_Prejbei_River?action=raw'... 200
+ - Scraped 0 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/1995_in_Wales?action=raw'... 200
+ - Scraped 1 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Barbarous_English_Fayre?action=raw'... 200
+ - Scraped 0 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Marcos_Bonfim?action=raw'... 200
+ - Scraped 2 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Dmitry_Rybolovlev?action=raw'... 200
+ - Scraped 5 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Partulina_dolei?action=raw'... 200
+ - Scraped 2 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Guru_Gobind_Singh_Super_Thermal_Power_Plant?action=raw'... 200
+ - Scraped 1 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/1971_Ohio_State_Buckeyes_football_team?action=raw'... 200
+ - Scraped 2 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/Charlie_Bailey?action=raw'... 200
+ - Scraped 2 URLs from this article
+Retrieving 'http://en.wikipedia.org/wiki/S%C3%A3o_Miguel_do_Gostoso?action=raw'... 200
+ - Scraped 3 URLs from this article
+Checking links...
+23 links are ready...
+http://en.wikipedia.org:80
+  /wiki/Bank_of_Cyprus ... 200
+http://globalrecordings.net:80
+  (2) /language/4743 ... 301 => http://globalrecordings.net/en/language/4743
+http://harti.mielu.ro:80
+  (3) /free2008/gutii.jpg ...  - http attempt 2
+404
+http://news.bbc.co.uk:80
+  (3) /1/hi/scotland/7899458.stm ... 301 => http://news.bbc.co.uk/2/hi/uk_news/scotland/7899458.stm
+http://pspcl.in:80
+Exception while retrieving page: No route to host - connect(2)
+  /index.htm/ ... Exception while retrieving head: execution expired
+ - http attempt 2
+Exception during connect while retrieving head: No route to host - connect(2)
+No route to host - connect(2)
+http://query.nytimes.com:80
+  /gst/fullpage.html?res=950DE0D81F3AF937A35756C0A96F948260 ... 301 => http://www.nytimes.com/1989/05/04/sports/sports-people-colleges-football-coach-resigns.html
+http://sportstats.mercurynews.com:80
+  /default.asp?c=bayareaca&page=cfoot/teams/direct613.htm ...  - http attempt 2
+500
+http://web.archive.org:80
+http://www.asm-fc.com:80
+  / ... 200
+http://www.bankofcyprus.com:80
+  /en-GB/ ... 200
+                                                         (checked 10 of 23)
+http://www.footballdatabase.eu:80
+  /football.joueurs.marcos-da-silva.bonfim.115203.en.html ... 200
+http://www.forbes.com:80
+  /lists/2010/10/billionaires-2010_Dmitry-Rybolovlev_KOXZ.html ... 200
+  /profile/dmitry-rybolovlev ... 301 => /profile/dmitry-rybolovlev/
+http://www.ibge.gov.br:80
+  /home/estatistica/populacao/estimativa2009/POP2009_DOU.pdf ... 200
+  /home/estatistica/economia/pibmunicipios/2005/tab01.pdf ... 200
+http://www.iucnredlist.org:80
+  /search/details.php/16357/all ... 301 => http://www.iucnredlist.org/apps/redlist/details/16357
+  / ... 200
+http://www.jhowell.net:80
+  /cf/scores/OhioState.htm ... 200
+http://www.pnud.org.br:80
+  /atlas/ranking/IDH-M%2091%2000%20Ranking%20decrescente%20(pelos%20dados%20de%202000).htm ... Exception while retrieving head: end of file reached
+ - http attempt 2
+200
+http://www.pro-football-reference.com:80
+  /colleges/ohiost/drafted.htm ... 200
+                                                         (checked 20 of 23)
+h
+EOM
+  return s
+end
+
+child1 = fork do
+  write_shit(TMux.new $stderr,0,80)
+end
+child2 = fork do
+  write_shit(TMux.new $stderr,80,80)
+end
+child3 = fork do
+  write_shit(TMux.new $stderr,160,80)
+end
+
+Process.wait child1
+Process.wait child2
+Process.wait child3
+exit
+
+
