@@ -120,6 +120,11 @@ private
 
     else
       t = @lastScrape + scrape_period
+
+      if $maxlag_until
+        t = [t, $maxlag_until].max
+      end
+
       $log.puts "* Next scrape at #{t}"
       return t
     end

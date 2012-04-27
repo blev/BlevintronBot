@@ -373,7 +373,7 @@ private
       article_set = (LIMIT_EDIT_ARTICLES || @bad.keys)
       earliest_ready = article_set.map {|article| earliest_next_edit_time article}.compact.min
 
-      t = [instantaneous_limit, daily_limit, earliest_ready].compact.max
+      t = [instantaneous_limit, daily_limit, earliest_ready, $maxlag_until].compact.max
       $log.puts "* Next edit at #{t}"
       return t
     end

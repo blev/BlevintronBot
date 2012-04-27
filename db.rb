@@ -283,7 +283,7 @@ private
   def not_dirty!
     @robots_dirty = false
     @fragment_dirty = [false] * NUM_FRAGMENTS
-    @edit_dirty = false
+    @scrape_dirty = false
   end
 
   def robots_dirty?
@@ -292,6 +292,10 @@ private
 
   def fragment_dirty? f
     @fragment_dirty[f]
+  end
+
+  def scrape_dirty?
+    @scrape_dirty
   end
 
 end
@@ -474,16 +478,8 @@ class Editor
     @edit_dirty = true
   end
 
-  def edit_dirty?
-    @edit_dirty
-  end
-
   def experiment_stats_dirty!
     @experiment_stats_dirty = true
-  end
-
-  def experiment_stats_dirty?
-    @experiment_stats_dirty
   end
 
   def next_action_time
@@ -538,12 +534,9 @@ private
   def not_dirty!
     @bad_links_dirty = false
     @previous_edits_dirty = false
-    @scrape_dirty = false
+    @edit_dirty = false
   end
 
-  def scrape_dirty?
-    @scrape_dirty
-  end
 
   def bad_links_dirty?
     @bad_links_dirty
@@ -551,6 +544,14 @@ private
 
   def previous_edits_dirty?
     @previous_edits_dirty
+  end
+
+  def edit_dirty?
+    @edit_dirty
+  end
+
+  def experiment_stats_dirty?
+    @experiment_stats_dirty
   end
 
 end

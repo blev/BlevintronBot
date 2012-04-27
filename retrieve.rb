@@ -202,6 +202,8 @@ def decode_response_body resp
   return resp.body
 end
 
+$maxlag_until = nil
+
 def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
   return [nil,nil] if uri==nil
 
@@ -237,9 +239,15 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
             # Did they send a max-lag?
             if uri.host.end_with? 'wikipedia.org'
               if resp['x-database-lag'] and resp['retry-after']
-                $log.puts "Max-Lag #{ resp['x-database-lag'] }" unless silent
+                lag = resp['x-database-lag'].to_i
+                $log.puts "Max-Lag #{ lag }" unless silent
                 $log.puts "- go do something else." unless silent
+
+                retry_after = resp['retry-after'].to_i
+                $maxlag_until = Time.now + [retry_after, EPSILON_WAIT].max
                 return [nil,nil]
+              else
+                $maxlag_until = nil
               end
             end
 
