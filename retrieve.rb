@@ -385,11 +385,6 @@ def parse_meta_tags body
   [location,cookie]
 end
 
-##
-## # For hellknowz
-## $records = []
-##
-
 # Given an HTTP response object,
 # return: [code, location or nil, cookie boolean]
 def head_parse_response uri, resp
@@ -436,25 +431,6 @@ def head_parse_response uri, resp
   rescue Exception => e
     $log.puts "Exception while parsing HEAD response: #{e}"
   end
-
-##
-##  # For Hellknowz
-##  if location
-##    record = [uri.to_s, resp.code, location, redirect_type, set_cookie, cookie_type]
-##    $records << record
-##    if $records.size >= 25
-##      $log.print "Saving hellknowz.txt..."
-##      File.open('hellknowz.txt', 'a') do |fout|
-##        fout.puts "# Source URL ; HTTP Code ; Redirect To URL ; Redirect type ; Cookie set? ; Cookie type"
-##        $records.each do |record|
-##          fout.puts( record.join ' ; ')
-##        end
-##      end
-##      $log.puts " done"
-##      $records = []
-##    end
-##  end
-##
 
   return [resp.code, location, set_cookie]
 end
