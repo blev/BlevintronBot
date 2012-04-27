@@ -241,9 +241,8 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
               if resp['x-database-lag'] and resp['retry-after']
                 lag = resp['x-database-lag'].to_i
                 $log.puts "Max-Lag #{ lag }" unless silent
-                $log.puts "- go do something else." unless silent
-
                 retry_after = resp['retry-after'].to_i
+                $log.puts "- go do something else for at least #{ retry_after }s." unless silent
                 $maxlag_until = Time.now + [retry_after, EPSILON_WAIT].max
                 return [nil,nil]
               else
@@ -455,10 +454,15 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
 
       # Try HTTP HEAD once, since it might be fast.
       begin
-        old_timeout = http.open_timeout
+        old_connect_timeout = http.open_timeout
         if OVERRIDE_HTTP_CONNECT_TIMEOUT
           http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
         end
+        old_read_timeout = http.read_timeout
+        if OVERRIDE_HTTP_READ_TIMEOUT
+          http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
+        end
+
 
 
         req = Net::HTTP::Head.new uri.request_uri
@@ -489,7 +493,8 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
         try_again = true
 
       ensure
-        http.open_timeout = old_timeout
+        http.read_timeout = old_read_timeout
+        http.open_timeout = old_connect_timeout
       end
 
       # Retry on HTTP error

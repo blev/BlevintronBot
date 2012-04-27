@@ -50,6 +50,8 @@ LINK_TRIAL_PERIOD = 2.days
 # used during link checking.
 # Set this to nil if you do not want to override
 OVERRIDE_HTTP_CONNECT_TIMEOUT = 45.seconds
+# And the HTTP read timeout
+OVERRIDE_HTTP_READ_TIMEOUT = 45.seconds
 
 # An eager strategy would check the first available
 # link as soon as it is ready.

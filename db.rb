@@ -431,11 +431,14 @@ class Editor
   end
 
   def receive_all_links q
+    n = 1
     while true
       receive_links q
       break if @scraper_is_done
       $log.puts "Waiting for scraper to send the done token..."
-      sleep 1
+
+      sleep [n,EPSILON_WAIT].min
+      n += 1
     end
   end
 
