@@ -3,33 +3,6 @@ BLOCKING FEATURES / BUGS -------------------------------------------------
 
 TESTING ------------------------------------------------------------------
 
-Edit rate is embarrassingly low.
-  - only low when bot is checking links
-  - though this is the expected steady-state
-Split the bot into two processes:
-  scraper / link checker
-  vs
-  editor / check reverts
-  requires
-    - split the database into disjoint halves
-      DONE
-    - split class DB into two different classes.
-      DONE
-    - determine some way to communicate links across those halves
-      DONE
-    - execute each half in a separate process
-      DONE
-    - eliminate ./wrapper.rb
-      DONE
-    - implement an IO driver which wraps text at a
-      certain column width, and which indents by a column
-      width.  Conceptually, to look like two different
-      terminals side-by-side in one.
-        DONE
-    - determine some way to share the $cancel variable across processes.
-      unnecessary.
-
-
 At least two bad edits due to URLs that end with right-paren )
   done
 
@@ -755,4 +728,31 @@ Move source code to another publishing site:
 
 The [http://www.example.com/'''No space title''']] idiom.
   done
+
+Edit rate is embarrassingly low.
+  - only low when bot is checking links
+  - though this is the expected steady-state
+Split the bot into two processes:
+  scraper / link checker
+  vs
+  editor / check reverts
+  requires
+    - split the database into disjoint halves
+      DONE
+    - split class DB into two different classes.
+      DONE
+    - determine some way to communicate links across those halves
+      DONE
+    - execute each half in a separate process
+      DONE
+    - eliminate ./wrapper.rb
+      DONE
+    - implement an IO driver which wraps text at a
+      certain column width, and which indents by a column
+      width.  Conceptually, to look like two different
+      terminals side-by-side in one.
+        DONE
+    - determine some way to share the $cancel variable across processes.
+      unnecessary.
+
 

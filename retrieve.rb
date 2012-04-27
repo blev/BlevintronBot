@@ -447,6 +447,12 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
 
       # Try HTTP HEAD once, since it might be fast.
       begin
+        old_timeout = http.open_timeout
+        if OVERRIDE_HTTP_CONNECT_TIMEOUT
+          http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
+        end
+
+
         req = Net::HTTP::Head.new uri.request_uri
         req['User-Agent'] = HONEST_USER_AGENT
         req['Host'] = uri.host
@@ -473,6 +479,9 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
         end
 
         try_again = true
+
+      ensure
+        http.open_timeout = old_timeout
       end
 
       # Retry on HTTP error
