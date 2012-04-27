@@ -15,6 +15,13 @@ Split the bot into two processes:
     - split class DB into two different classes.
       DONE
     - determine some way to communicate links across those halves
+    - execute each half in a separate process
+    - eliminate ./wrapper.rb
+    - implement an IO driver which wraps text at a
+      certain column width, and which indents by a column
+      width.  Conceptually, to look like two different
+      terminals side-by-side in one.
+        DONE
     - determine some way to share the $cancel variable across processes.
       unnecessary.
 
