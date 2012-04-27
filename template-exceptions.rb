@@ -13,6 +13,7 @@
 BOYCOTT_TEMPLATES = {
   'infobox writer' => ['website'],
   'infobox ncaa football school' => ['websiteurl'],
+  'infobox cricketer biography' => ['source'],
   'infobox officeholder' => ['source'],
   # Begin redirects to {{infobox officeholder}}
   'infobox am' => ['source'],
