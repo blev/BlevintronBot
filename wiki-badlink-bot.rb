@@ -176,7 +176,6 @@ def editor_task
   $log.flush
 end
 
-
 $log.puts
 $log.puts "Startup: #{Time.now}"
 $log.puts
