@@ -13,6 +13,10 @@
       the command is 'eog'.  Look at the
       option IMAGE_VIEWER_APP in config-advanced.rb
 
+    The terminal output assumes that your terminal is at least 160
+    characters wide (two column output, each column is TMUX_COLUMN_WRAP
+    characters wide).
+
 (1) Get all of the source into a single directory.
 
 (2) (Optional) Edit config-simple.rb, config-advanced.rb

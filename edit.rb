@@ -566,25 +566,6 @@ private
     "#{edit_log_dir time}.tar.bz2"
   end
 
-  # Print the string to fout
-  # Try to wrap lines.
-  def linewrap fout, str
-    str.each_line do |line|
-      while line.size >= DIFF_COLUMN_WRAP
-        col = line.rindex(/\s+/, DIFF_COLUMN_WRAP)
-        col ||= line.index(/\s+/, DIFF_COLUMN_WRAP)
-        break if col == nil
-
-        before = line[0 ... col]
-        fout.puts before
-
-        col2 = line.index(/\S/, col) || col
-        line = line[ col2 .. -1]
-      end
-      fout.puts line
-    end
-  end
-  
   # Every once in a while, clean out some cruft.
   def manage_bad_links
     return if @bad.size <= MAX_BAD_LINK_POOL

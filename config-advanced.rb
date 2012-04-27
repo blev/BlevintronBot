@@ -194,6 +194,9 @@ MAX_DATE_ERROR_FOR_ARCHIVES = 6.months
 # don't wrap lines while editing wikipedia)
 DIFF_COLUMN_WRAP = 80
 
+# --------------- Terminal multiplexor
+
+TMUX_COLUMN_WRAP = 80
 
 # -------------- Shutdown page
 

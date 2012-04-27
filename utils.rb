@@ -373,4 +373,23 @@ class Fixnum
 end
 
 
+# Print the string to fout
+# Try to wrap lines.
+# TODO merge with TMux somewhow
+def linewrap fout, str, width = DIFF_COLUMN_WRAP
+  str.each_line do |line|
+    while line.size >= width
+      col = line.rindex(/\s+/, width)
+      col ||= line.index(/\s+/, width)
+      break if col == nil
+
+      before = line[0 ... col]
+      fout.puts before
+
+      col2 = line.index(/\S/, col) || col
+      line = line[ col2 .. -1]
+    end
+    fout.puts line
+  end
+end
 
