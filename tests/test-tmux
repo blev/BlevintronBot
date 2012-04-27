@@ -19,6 +19,7 @@ end
 
 def test_string
   s = <<EOM
+*** first line of sample output ***
 declared access date July 9, 2011
 Retrieving 'http://wayback.archive.org/web/2011*/http://www.ceclients.com/sites/StPetersburgYachtClub/files/Majorawards.pdf'... 404, Failed.
 Retrieving 'http://wayback.archive.org/web/2012*/http://www.ceclients.com/sites/StPetersburgYachtClub/files/Majorawards.pdf'... 404, Failed.
@@ -140,6 +141,7 @@ http://www.pro-football-reference.com:80
   /colleges/ohiost/drafted.htm ... 200
                                                          (checked 20 of 23)
 h
+***last line of sample output***
 EOM
   return s
 end
