@@ -102,7 +102,15 @@ private
   def write_indent str
     prefix = ' ' * @indent
     line = prefix + str
-    @fout.syswrite line
+
+    until line == ''
+      begin
+        nr = @fout.syswrite line
+        line = line[nr .. -1]
+      rescue Errno::EINTR => e
+        # Retry on interrupt.
+      end
+    end
   end
 
 end
