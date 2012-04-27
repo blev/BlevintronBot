@@ -51,6 +51,10 @@ tests = [
   [ " '''bold http://en.wikipedia.org/.'''", "http://en.wikipedia.org/" ],
   [ " '''bold ''italics http://en.wikipedia.org/''.'''", "http://en.wikipedia.org/" ],
   [ " ''italics '''bold http://en.wikipedia.org/'''.''", "http://en.wikipedia.org/" ],
+  [ " [http://foo.com'''No space before title''']", "http://foo.com" ],
+  [ " [http://foo.com''No space before title'']", "http://foo.com" ],
+  [ " [http://foo.com'''Nospacebeforetitle''']", "http://foo.com" ],
+  [ " [http://foo.com''Nospacebeforetitle'']", "http://foo.com" ],
 ]
 
 tests.each do |input, output|

@@ -339,14 +339,21 @@ def remove_trailing_junk url
     next if url.chomp! ']'
 
     #           document               =>    URI.extract              =>     corrected
+    #   http://foo.com'''title'''      => http://foo.com'''title'''   => http://foo.com
     #    ''http://en.wikipedia.org/''  => http://en.wikipedia.org/''  => http://en.wikipedia.org
     #   '''http://en.wikipedia.org/''' => http://en.wikipedia.org/''' => http://en.wikipedia.org
     #
     # We approximate this condition.  We will likely make fewer mistakes by
     # assuming that URLs do not end with ''' or ''
-    # TODO: make it better...
-    next if url.chomp! "'''"
-    next if url.chomp! "''"
+    if url =~ /^(.*?)'''.*$/
+      url = $1
+      next
+    end
+
+    if url =~ /^(.*?)''.*$/
+      url = $1
+      next
+    end
 
     break
   end

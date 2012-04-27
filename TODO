@@ -1,5 +1,6 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
+
 Edit rate is embarrassingly low.
   - only low when bot is checking links
   - though this is the expected steady-state
@@ -739,4 +740,6 @@ Move source code to another publishing site:
   might require a new means to censor the password
   DONE
 
+The [http://www.example.com/'''No space title''']] idiom.
+  done
 
