@@ -402,7 +402,7 @@ class Link
       observation(RetrievalAttempt.new code,location,cookie)
     end
 
-    puts @attempts.last
+    $log.puts @attempts.last
   end
 
 end
