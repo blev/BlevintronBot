@@ -22,7 +22,7 @@ require 'retrieve'
 require 'history'
 
 
-class DB
+class Editor
 
   # Returns an array of [user,subject,message]
   def compose_solicitations name, broken_links, introductions, replacements, exp_case

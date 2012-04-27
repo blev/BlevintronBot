@@ -96,28 +96,14 @@ def load_object filename
   end
 end
 
-
-
-class DB
-  def initialize(robots = nil, frags = nil, bads = nil, prevs = nil, scrapedb = nil, editdb = nil)
+class Scraper
+  def initialize(robots = nil, frags = nil, scrapedb = nil)
     if scrapedb == nil
 
       @fragments = Array.new(NUM_FRAGMENTS) { Hash.new }
-      @bad = {}
-
-      @previous_edits = {}
 
       @lastScrape = Time.now - HIGH_TRAFFIC_EDIT_PERIOD
       @lastEdit   = Time.now
-      @numEditsOnLastDay = 0
-      @numEdits = 0
-
-      @numRevertedEdits = 0
-      @numNonRevertedEdits = 0
-      @numSolicitations = 0
-
-      @lastStatsUpload = Time.now - MIN_STATS_UPLOAD_PERIOD
-      @experiment_stats_dirty = true
 
       @robotstxt = {}
 
@@ -129,17 +115,11 @@ class DB
       @numOkLinks = 0
       @numGoodEnoughLinks = 0
 
-      @experiment_stats = {}
-      @solicits_per_user = {}
-
       dirty!
 
     else
       @robotstxt          = robots
       @fragments          = frags
-      @bad                = bads
-
-      @previous_edits     = prevs
 
       @first_run_time     = scrapedb['first_run_time']
       @lastScrape         = scrapedb['lastScrape']
@@ -148,17 +128,6 @@ class DB
       @numArticlesVisited = scrapedb['numArticlesVisited']
       @numOkLinks         = scrapedb['numOkLinks']
       @numGoodEnoughLinks = scrapedb['numGoodEnoughLinks']
-
-      @lastEdit               = editdb['lastEdit']
-      @numEditsOnLastDay      = editdb['numEditsOnLastDay']
-      @numEdits               = editdb['numEdits']
-      @numRevertedEdits       = editdb['numRevertedEdits']
-      @numNonRevertedEdits    = editdb['numNonRevertedEdits']
-      @numSolicitations       = editdb['numSolicitations']
-      @lastStatsUpload        = editdb['lastStatsUpload']
-      @experiment_stats_dirty = editdb['experiment_stats_dirty']
-      @experiment_stats       = editdb['experiment_stats']
-      @solicits_per_user      = editdb['solicits_per_user']
 
       not_dirty!
     end
@@ -175,16 +144,13 @@ class DB
         frags[i] = load_object "#{dir}/fragment-#{i}"
         $log.puts "- Fragment #{i} has #{ frags[i].size } links"
       end
-      bads = load_object "#{dir}/bad"
-      prevs = load_object "#{dir}/previous_edits"
 
       scrapedb = load_object "#{dir}/scrape-db"
-      editdb = load_object "#{dir}/edit-db"
-      return DB.new(robots, frags, bads, prevs, scrapedb, editdb)
+      return Scraper.new(robots, frags, scrapedb)
 
     rescue Exception => e
       $log.puts "Error loading database from file: #{e}"
-      return DB.new
+      return Scraper.new
     end
   end
 
@@ -215,18 +181,6 @@ class DB
         end
       end
 
-      # Save the bad links
-      if bad_links_dirty?
-        $log.print 'b'
-        save_object @bad, "#{dir}/bad"
-      end
-
-      # Save previous edits
-      if previous_edits_dirty?
-        $log.print 'p'
-        save_object @previous_edits, "#{dir}/previous_edits"
-      end
-
       # Save statistics, etc
       if scrape_dirty?
         $log.print 'S'
@@ -245,27 +199,6 @@ class DB
         save_object stats, "#{dir}/scrape-db"
       end
 
-      if edit_dirty?
-        $log.print 'E'
-
-        # This is a sloppy mess. clean it up.
-        stats = {}
-
-        # These are used by the editing process.
-        stats['lastEdit'] = @lastEdit
-        stats['numEditsOnLastDay'] = @numEditsOnLastDay
-        stats['numEdits'] = @numEdits
-        stats['lastStatsUpload'] = @lastStatsUpload
-        stats['experiment_stats_dirty'] = @experiment_stats_dirty
-        stats['numRevertedEdits'] = @numRevertedEdits
-        stats['numNonRevertedEdits'] = @numNonRevertedEdits
-        stats['numSolicitations'] = @numSolicitations
-        stats['experiment_stats'] = @experiment_stats
-        stats['solicits_per_user'] = @solicits_per_user
-
-        save_object stats, "#{dir}/edit-db"
-      end
-
       $log.puts " #{Time.now - start} seconds"
 
     rescue Exception => e
@@ -275,25 +208,10 @@ class DB
     not_dirty!
   end
 
-  def clear_experiment_stats!
-    edit_dirty!
-    @numEdits = 0
-    @numEditsOnLastDay = 0
-    @numRevertedEdits = 0
-    @numNonRevertedEdits = 0
-    @numSolicitations = 0
-    @solicits_per_user = {}
-    @experiment_stats = {}
-    @experiment_stats_dirty = true
-  end
-
   def dirty!
     @robots_dirty = true
     @fragment_dirty = [true] * NUM_FRAGMENTS
-    @bad_links_dirty = true
-    @previous_edits_dirty = true
     @scrape_dirty = true
-    @edit_dirty = true
   end
 
   def robots_dirty!
@@ -304,22 +222,6 @@ class DB
     @fragment_dirty[f] = true
   end
 
-  def bad_links_dirty!
-    @bad_links_dirty = true
-  end
-
-  def previous_edits_dirty!
-    @previous_edits_dirty = true
-  end
-
-  def edit_dirty!
-    @edit_dirty = true
-  end
-
-  def edit_dirty?
-    @edit_dirty
-  end
-
   def scrape_dirty!
     @scrape_dirty = true
   end
@@ -328,16 +230,8 @@ class DB
     @scrape_dirty
   end
 
-  def experiment_stats_dirty!
-    @experiment_stats_dirty = true
-  end
-
-  def experiment_stats_dirty?
-    @experiment_stats_dirty
-  end
-
   def next_action_time
-    [next_scrape_time, next_check_link_time, next_edit_time].compact.min
+    [next_scrape_time, next_check_link_time].compact.min
   end
 
   def wait
@@ -388,6 +282,204 @@ class DB
     $log.puts "- - - - - - - - - - - - - - - - - -"
   end
 
+private
+
+  def not_dirty!
+    @robots_dirty = false
+    @fragment_dirty = [false] * NUM_FRAGMENTS
+    @edit_dirty = false
+  end
+
+  def robots_dirty?
+    @robots_dirty
+  end
+
+  def fragment_dirty? f
+    @fragment_dirty[f]
+  end
+
+end
+
+class Editor
+  def initialize(bads = nil, prevs = nil, editdb = nil)
+    if editdb == nil
+
+      @bad = {}
+      @previous_edits = {}
+      @lastEdit   = Time.now
+      @numEditsOnLastDay = 0
+      @numEdits = 0
+
+      @numRevertedEdits = 0
+      @numNonRevertedEdits = 0
+      @numSolicitations = 0
+
+      @lastStatsUpload = Time.now - MIN_STATS_UPLOAD_PERIOD
+      @experiment_stats_dirty = true
+
+      @experiment_stats = {}
+      @solicits_per_user = {}
+
+      dirty!
+
+    else
+      @bad                = bads
+      @previous_edits     = prevs
+
+      @lastEdit               = editdb['lastEdit']
+      @numEditsOnLastDay      = editdb['numEditsOnLastDay']
+      @numEdits               = editdb['numEdits']
+      @numRevertedEdits       = editdb['numRevertedEdits']
+      @numNonRevertedEdits    = editdb['numNonRevertedEdits']
+      @numSolicitations       = editdb['numSolicitations']
+      @lastStatsUpload        = editdb['lastStatsUpload']
+      @experiment_stats_dirty = editdb['experiment_stats_dirty']
+      @experiment_stats       = editdb['experiment_stats']
+      @solicits_per_user      = editdb['solicits_per_user']
+
+      not_dirty!
+    end
+  end
+
+  def self.load(dir)
+    $log.puts "Loading database from persistent storage"
+    begin
+      bads = load_object "#{dir}/bad"
+      prevs = load_object "#{dir}/previous_edits"
+
+      editdb = load_object "#{dir}/edit-db"
+      return Editor.new(bads, prevs, editdb)
+
+    rescue Exception => e
+      $log.puts "Error loading database from file: #{e}"
+      return Editor.new
+    end
+  end
+
+  def save(dir)
+    begin
+      start = Time.now
+      $log.print "Saving database to persistent storage... "
+
+      # Make directory, if it doesn't already exist.
+      begin
+        Dir.mkdir dir
+      rescue Exception => e
+        # directory already exists
+      end
+
+      # Save the bad links
+      if bad_links_dirty?
+        $log.print 'b'
+        save_object @bad, "#{dir}/bad"
+      end
+
+      # Save previous edits
+      if previous_edits_dirty?
+        $log.print 'p'
+        save_object @previous_edits, "#{dir}/previous_edits"
+      end
+
+      if edit_dirty?
+        $log.print 'E'
+
+        # This is a sloppy mess. clean it up.
+        stats = {}
+
+        # These are used by the editing process.
+        stats['lastEdit'] = @lastEdit
+        stats['numEditsOnLastDay'] = @numEditsOnLastDay
+        stats['numEdits'] = @numEdits
+        stats['lastStatsUpload'] = @lastStatsUpload
+        stats['experiment_stats_dirty'] = @experiment_stats_dirty
+        stats['numRevertedEdits'] = @numRevertedEdits
+        stats['numNonRevertedEdits'] = @numNonRevertedEdits
+        stats['numSolicitations'] = @numSolicitations
+        stats['experiment_stats'] = @experiment_stats
+        stats['solicits_per_user'] = @solicits_per_user
+
+        save_object stats, "#{dir}/edit-db"
+      end
+
+      $log.puts " #{Time.now - start} seconds"
+
+    rescue Exception => e
+      $log.puts "Exception while saving db: #{e}"
+    end
+
+    not_dirty!
+  end
+
+  def receive_link link
+    # Add to bad, group by article.
+    link.articles.each do |article|
+      @bad[article] ||= []
+      @bad[article]  << link
+      bad_links_dirty!
+    end
+  end
+
+  def clear_experiment_stats!
+    edit_dirty!
+    @numEdits = 0
+    @numEditsOnLastDay = 0
+    @numRevertedEdits = 0
+    @numNonRevertedEdits = 0
+    @numSolicitations = 0
+    @solicits_per_user = {}
+    @experiment_stats = {}
+    @experiment_stats_dirty = true
+  end
+
+  def dirty!
+    @bad_links_dirty = true
+    @previous_edits_dirty = true
+    @edit_dirty = true
+  end
+
+  def bad_links_dirty!
+    @bad_links_dirty = true
+  end
+
+  def previous_edits_dirty!
+    @previous_edits_dirty = true
+  end
+
+  def edit_dirty!
+    @edit_dirty = true
+  end
+
+  def edit_dirty?
+    @edit_dirty
+  end
+
+  def experiment_stats_dirty!
+    @experiment_stats_dirty = true
+  end
+
+  def experiment_stats_dirty?
+    @experiment_stats_dirty
+  end
+
+  def next_action_time
+    [next_edit_time].compact.min
+  end
+
+  def wait
+    wait_until = next_action_time
+    delay = EPSILON_WAIT
+    if wait_until
+      delay = wait_until - Time.now
+      $log.print "Nothing to do until #{wait_until}... " if delay > 0
+    end
+
+    delay = EPSILON_WAIT if delay < EPSILON_WAIT
+    delay = MAX_IDLE_WAIT if delay > MAX_IDLE_WAIT
+
+    $log.puts "sleeping #{ delay.ceil } seconds"
+    sleep_or_cancel delay
+  end
+
   def print_edit_stats
     $log.puts "- - - - - - - - - - - - - - - - - -"
     $log.puts "Edit Stats #{Time.now}"
@@ -419,20 +511,9 @@ class DB
 private
 
   def not_dirty!
-    @robots_dirty = false
-    @fragment_dirty = [false] * NUM_FRAGMENTS
     @bad_links_dirty = false
     @previous_edits_dirty = false
-    @edit_dirty = false
     @scrape_dirty = false
-  end
-
-  def robots_dirty?
-    @robots_dirty
-  end
-
-  def fragment_dirty? f
-    @fragment_dirty[f]
   end
 
   def bad_links_dirty?

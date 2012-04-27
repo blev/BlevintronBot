@@ -13,8 +13,10 @@ Split the bot into two processes:
     - split the database into disjoint halves
       DONE
     - split class DB into two different classes.
+      DONE
     - determine some way to communicate links across those halves
     - determine some way to share the $cancel variable across processes.
+      unnecessary.
 
 migrate to ruby 1.9 ?
   - would give real threads.

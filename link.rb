@@ -38,7 +38,7 @@ class RetrievalAttempt
   # Return true if changed.
   def fix_code!
     # This nightmare exists because in the long-long ago,
-    # we stored our DB with YAML, but now with Marshal.
+    # we stored our database with YAML, but now with Marshal.
     #
     #   Exceptions cannot be serialized via Marshal
     #     (hence, a need to change stuff)

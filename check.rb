@@ -15,7 +15,7 @@ require 'throttling'
 require 'markup'
 require 'utils'
 
-class DB
+class Scraper
 
 
   def check_links!
@@ -207,12 +207,8 @@ private
       scrape_dirty!
       @numRedirects += 1
 
-      # Add to bad, group by article.
-      link.articles.each do |article|
-        @bad[article] ||= []
-        @bad[article]  << link
-        bad_links_dirty!
-      end
+      # TODO: send via pipe to EditorThread
+      $editor.receive_link link
 
     elsif link.is_ok?
       remove_from_fragments link
@@ -232,12 +228,8 @@ private
       scrape_dirty!
       @numBad += 1
 
-      # Add to bad, group by article
-      link.articles.each do |article|
-        @bad[article] ||= []
-        @bad[article]  << link
-        bad_links_dirty!
-      end
+      # TODO: send via pipe to EditorThread
+      $editor.receive_link link
 
     else
       # Add it back onto the schedule

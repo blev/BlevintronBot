@@ -23,7 +23,7 @@ require 'solicit'
 require 'editlog'
 require 'fix'
 
-class DB
+class Editor
 
   def perform_edits!
     nIters = 0

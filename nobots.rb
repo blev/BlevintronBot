@@ -116,7 +116,7 @@ def path_match(uri, pattern)
   false
 end
 
-class DB
+class Scraper
 
   # Is a given path denied per /robots.txt ?
   # uri is a URI object corresponding to the

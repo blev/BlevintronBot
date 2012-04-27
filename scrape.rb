@@ -15,7 +15,7 @@ require 'yaml'
 require 'utils'
 require 'retrieve'
 
-class DB
+class Scraper
 
   def scrape!
     return unless should_scrape?

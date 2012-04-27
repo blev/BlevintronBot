@@ -27,7 +27,7 @@ while i < ARGV.size
   end
 end
 
-db = DB.load input_dir
+db = Editor.load input_dir
 db.clear_experiment_stats!
 db.save output_dir
 

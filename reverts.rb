@@ -17,7 +17,7 @@ require 'retrieve'
 
 require 'editlog'
 
-class DB
+class Editor
 
   def upload_stats!
     return unless should_upload_stats?

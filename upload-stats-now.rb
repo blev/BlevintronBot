@@ -9,7 +9,7 @@
 
 require 'db'
 
-db = DB.load DB_DIR
+db = Editor.load DB_DIR
 
 db.do_upload_experiment
 

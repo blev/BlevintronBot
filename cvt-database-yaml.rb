@@ -34,21 +34,24 @@ while i < ARGV.size
   end
 end
 
-db = DB.load input_dir
+scraper = Scraper.load input_dir
+editor  = Editor.load input_dir
 
-db.robots_dirty! if limit.include? 'r'
-db.scrape_dirty! if limit.include? 'S'
-db.edit_dirty! if limit.include? 'E'
-db.bad_links_dirty! if limit.include? 'b'
-db.previous_edits_dirty! if limit.include? 'p'
+scraper.robots_dirty! if limit.include? 'r'
+scraper.scrape_dirty! if limit.include? 'S'
 
 for i in 0 ... NUM_FRAGMENTS
   if limit.include? i.to_s
-    db.fragment_dirty! i
+    scraper.fragment_dirty! i
   end
 end
 
+editor.edit_dirty! if limit.include? 'E'
+editor.bad_links_dirty! if limit.include? 'b'
+editor.previous_edits_dirty! if limit.include? 'p'
+
 # This will yield a runtime warning
 SAVE_DB_FORMAT = '.yaml'
-db.save output_dir
+scraper.save output_dir
+editor.save output_dir
 

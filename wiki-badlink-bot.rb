@@ -71,7 +71,8 @@ trap "TERM" do
   $cancel=true
 end
 
-$db = DB.load DB_DIR
+$scraper = Scraper.load DB_DIR
+$editor  = Editor.load DB_DIR
 
 # If we receive SIGUSR1, we will mark our entire database dirty
 trap "USR1" do
@@ -82,12 +83,13 @@ trap "USR1" do
   $log.puts
   $log.flush
 
-  $db.dirty!
+  $scraper.dirty!
+  $editor.dirty!
 end
 
 def shutdown!
-  $db.print_scrape_stats
-  $db.print_edit_stats
+  $scraper.print_scrape_stats
+  $editor.print_edit_stats
   File.delete PID_FILE
   $log.puts "Shutdown: #{Time.now}"
   $log.flush
@@ -96,11 +98,12 @@ end
 edits_allowed = true
 until $cancel
 
-  $db.print_scrape_stats
-  $db.print_edit_stats
+  $scraper.print_scrape_stats
+  $editor.print_edit_stats
 
   # Keep CPU, Network utilization low
-  $db.wait
+  $scraper.wait
+#  $editor.wait
   break if $cancel
 
   # I run this on my laptop in the background.
@@ -128,25 +131,26 @@ until $cancel
   end
 
   # Find more links
-  $db.scrape!
+  $scraper.scrape!
 
   # Check link quality
-  $db.check_links!
+  $scraper.check_links!
 
   # Perform editing
   if edits_allowed
-    $db.perform_edits!
+    $editor.perform_edits!
   end
 
   # Check if my changes were reverted,
   # and maybe do something about that.
-  $db.check_previous_edits!
+  $editor.check_previous_edits!
 
   # Upload my stats
-  $db.upload_stats!
+  $editor.upload_stats!
 
   # Save the database to persistent storage
-  $db.save DB_DIR
+  $scraper.save DB_DIR
+  $editor.save DB_DIR
 end
 
 shutdown!

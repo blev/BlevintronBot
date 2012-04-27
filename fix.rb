@@ -7,7 +7,7 @@
 require 'config'
 require 'template-exceptions'
 
-class DB
+class Editor
 
   # Fix links in article 'name' with latest revision 'body'
   # Output:
