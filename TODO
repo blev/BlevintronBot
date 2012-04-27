@@ -1,10 +1,11 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
 
+TESTING ------------------------------------------------------------------
+
 Edit rate is embarrassingly low.
   - only low when bot is checking links
   - though this is the expected steady-state
-
 Split the bot into two processes:
   scraper / link checker
   vs
@@ -15,8 +16,11 @@ Split the bot into two processes:
     - split class DB into two different classes.
       DONE
     - determine some way to communicate links across those halves
+      DONE
     - execute each half in a separate process
+      DONE
     - eliminate ./wrapper.rb
+      DONE
     - implement an IO driver which wraps text at a
       certain column width, and which indents by a column
       width.  Conceptually, to look like two different
@@ -25,10 +29,6 @@ Split the bot into two processes:
     - determine some way to share the $cancel variable across processes.
       unnecessary.
 
-migrate to ruby 1.9 ?
-  - would give real threads.
-
-TESTING ------------------------------------------------------------------
 
 At least two bad edits due to URLs that end with right-paren )
   done
@@ -41,6 +41,10 @@ maintain a list of special cases for weird templates.
     done
 
 TABLED -------------------------------------------------------------------
+
+migrate to ruby 1.9 ?
+  - would give real threads.
+  moot
 
 cantor set 500+content
   - take an in-depth look at all known 500s, to see if there

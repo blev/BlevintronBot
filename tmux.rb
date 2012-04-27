@@ -18,22 +18,33 @@ class TMux
     @line = ''
   end
 
-  def puts s
-    self << s << "\n"
+  def puts(s='')
+    print s
+    print "\n"
+  end
+
+  def << s
+    print s
   end
 
   def print s
-    self << s
-  end
-
-  def << str
-    @line << str
+    s ||= '(nil)'
+    @line << (s.to_s)
     flush?
   end
 
   def flush
-    write_indent @line
-    @line = ''
+    flush?
+    if @line != ''
+      write_indent @line
+      @line = ''
+    end
+  end
+
+  def close
+    flush
+    @fout.close
+    @fout = nil
   end
 
 private

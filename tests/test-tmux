@@ -147,13 +147,13 @@ EOM
 end
 
 child1 = fork do
-  write_shit(TMux.new $stderr,0,80)
+  write_shit(TMux.new $stderr,0,60)
 end
 child2 = fork do
-  write_shit(TMux.new $stderr,80,80)
+  write_shit(TMux.new $stderr,60,60)
 end
 child3 = fork do
-  write_shit(TMux.new $stderr,160,80)
+  write_shit(TMux.new $stderr,120,60)
 end
 
 Process.wait child1

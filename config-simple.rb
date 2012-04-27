@@ -16,6 +16,8 @@ DB_DIR = "#{ENV['HOME']}/.wikipedia-badlink-bot/"
 
 # While running, store my process id in this file.
 PID_FILE = "#{DB_DIR}/pid"
+SCRAPER_PID_FILE = "#{DB_DIR}/pid.scraper"
+EDITOR_PID_FILE = "#{DB_DIR}/pid.editor"
 
 # Should I save a local record of edits?
 # This information is wholly redundant with

@@ -339,6 +339,8 @@ class Editor
 
       not_dirty!
     end
+
+    @scraper_is_done = false
   end
 
   def self.load(dir)
@@ -408,6 +410,33 @@ class Editor
     end
 
     not_dirty!
+  end
+
+  def receive_links q
+    return if @scraper_is_done
+
+    while true
+      obj = q.receive
+
+      case obj
+      when Link
+        receive_link obj
+      when :scraper_shutdown
+        @scraper_is_done = true
+        break
+      when nil
+        break
+      end
+    end
+  end
+
+  def receive_all_links q
+    while true
+      receive_links q
+      break if @scraper_is_done
+      $log.puts "Waiting for scraper to send the done token..."
+      sleep 1
+    end
   end
 
   def receive_link link

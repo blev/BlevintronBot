@@ -1,0 +1,33 @@
+#!/usr/bin/ruby -w
+
+require 'object_queue'
+require 'db'
+require 'tmux'
+
+$q = ObjectQueue.new
+
+$log = $stderr
+
+child1 = fork do
+  $log = TMux.new($log, 0, 80)
+  $q.send "Hello world"
+  $q.send 42
+  $q.send( :x => "Hello world", :y => 42 )
+  $q.send :done
+  $q.close_sender
+end
+
+child2 = fork do
+  $log = TMux.new($log, 80, 80)
+  while true
+    obj = $q.receive
+    break if obj == :done
+
+    $log.puts obj
+  end
+  $q.close_receiver
+end
+
+Process.waitpid child1
+Process.waitpid child2
+
