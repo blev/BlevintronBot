@@ -109,10 +109,6 @@ private
 
     $log.puts "#{group_scheme}://#{group_host}:#{group_port}"
     reconnect(firstURI) do |http|
-      if OVERRIDE_HTTP_CONNECT_TIMEOUT
-        http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
-      end
-
       # Each link in this group
       until ready.empty?
         break if $cancel
