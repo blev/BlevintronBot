@@ -57,8 +57,6 @@ class String
     # - Mark occurrences of super urls in this string
     bad_positions = {}
     strict_super_urls.sort {|x,y| x.size <=> y.size }.each do |super_url|
-#      $log.puts "Superstrings of '#{url}' include:" if bad_positions.empty?
-#      $log.puts " - '#{super_url}'"
       each_occurrence(super_url) do |idx|
         # Mark every position within this occurrence as verbotten.
         for i in idx ... idx+super_url.size
@@ -369,7 +367,6 @@ def all_uses_dead_or_archived? body, url
   # There may be more than one.
   body.each_url_occurrence url do |idx|
     unless this_use_dead_or_archived? body,url,idx
-#      puts "    #{url} at #{idx} neither (i) marked dead, nor (ii) marked with an alternative"
       return false
     end
   end

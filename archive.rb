@@ -66,7 +66,7 @@ def webcite_permalink(found_url, http_in)
 #  body,xdate = retrieve_page top, http_in, cookie
 #  return nil unless body
 #
-#  puts body
+#  $log.puts body
 #  body.scan /<a\s+href="([^"]+)"\s+[^>]*>Permalink/i do |match|
 #    return "#{WEBCITE_PREFIX}/#{$1}"
 #  end
@@ -135,11 +135,6 @@ def find_archive_url(oldurl, date, search_archive_http_in=nil, confirm_archive_h
 
     # Sort by date error
     hits.sort! { |a1, a2| (date - a1[0]).abs <=> (date - a2[0]).abs }
-
-#    # Diagnostic: print top five:
-#    hits[0 ... 5].each do |found_date,found|
-#      $log.puts "#{found_date} -- #{found}"
-#    end
 
     # Now select the first hit which works
     hits.each do |found_date, found_url, source|
