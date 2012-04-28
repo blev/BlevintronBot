@@ -74,6 +74,10 @@ BOYCOTT_TEMPLATES = {
 
 # These templates are okay so long as we put
 # {{Dead link}} after the template.
-TAG_AFTER_TEMPLATES = ['url', 'official website']
+TAG_AFTER_TEMPLATES = [
+  'url',
+  'official website',
+  'official', # redirect to official website
+  ]
 
 
