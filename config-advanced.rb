@@ -198,7 +198,7 @@ DIFF_COLUMN_WRAP = 80
 
 # --------------- Terminal multiplexor
 
-TMUX_COLUMN_WRAP = 95
+TMUX_COLUMN_WRAP = 85
 
 # -------------- Shutdown page
 
