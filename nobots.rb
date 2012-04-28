@@ -47,7 +47,6 @@ def wiki_forbids_bots? body
         return true if optout.include? BOT_USERNAME.downcase
       end
 
-      return false if allow == nil and deny == nil and optout == nil
     end
   end
 
