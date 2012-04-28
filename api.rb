@@ -205,8 +205,8 @@ class Session
       end
 
     rescue Exception => e
-      puts e
-      puts(e.backtrace.join "\n")
+      $log.puts e
+      $log.puts(e.backtrace.join "\n")
       return ['exception', e]
     end
 
