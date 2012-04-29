@@ -96,8 +96,6 @@ def scraper_task
     scraper.save DB_DIR
   end
 
-  $q.send :scraper_shutdown
-  $q.close_sender
 
   scraper.print_scrape_stats
 
@@ -168,8 +166,6 @@ def editor_task
   editor.receive_all_links $q
   editor.save DB_DIR
 
-  $q.close_receiver
-
   editor.print_edit_stats
 
   File.delete EDITOR_PID_FILE
@@ -221,7 +217,12 @@ until $cancel
 end
 
 Process.waitpid scraper_pid if scraper_pid
+
+$q.send :scraper_shutdown
+$q.close_sender
+
 Process.waitpid editor_pid  if editor_pid
+$q.close_receiver
 
 File.delete PID_FILE
 $log.puts "Shutdown: #{Time.now}"
