@@ -71,31 +71,28 @@ def scraper_task
     scraper.wait
     break if $cancel
 
-    # I run this on my laptop in the background.
-    # No point in wasting battery.
-    if on_battery_power?
+    case emergency_shutdown_check
+    when :battery
       $log.puts "Idle: on battery power..."
       sleep_or_cancel BATTERY_WAIT
-      next
-    end
 
-    # Contact my emergency shutdown page.
-    if emergency_shutdown_check == :bad_network
+    when :bad_network
       $log.puts "Idle: network is down..."
       sleep_or_cancel NETWORK_WAIT
-      next
+
+    else
+      # Normal operation
+
+      # Find more links
+      scraper.scrape!
+
+      # Check link quality
+      scraper.check_links!
+
+      # Save the database to persistent storage
+      scraper.save DB_DIR
     end
-
-    # Find more links
-    scraper.scrape!
-
-    # Check link quality
-    scraper.check_links!
-
-    # Save the database to persistent storage
-    scraper.save DB_DIR
   end
-
 
   scraper.print_scrape_stats
 
@@ -117,50 +114,50 @@ def editor_task
 
     editor.print_edit_stats
 
-    editor.receive_links $q
-
     # Keep CPU, Network utilization low
     editor.wait
     break if $cancel
 
-    # I run this on my laptop in the background.
-    # No point in wasting battery.
-    if on_battery_power?
-      $log.puts "Idle: on battery power..."
-      sleep_or_cancel BATTERY_WAIT
-      next
-    end
+    # Dequeue link objects sent over the queue
+    # from the scraper task
+    editor.receive_links $q
 
     # Contact my emergency shutdown page.
-    case emergency_shutdown_check
-    when :bad_network
-      $log.puts "Idle: network is down..."
-      sleep_or_cancel NETWORK_WAIT
-      next
+    status = emergency_shutdown_check
 
-    when :good
-      $log.puts "Edits are allowed again :)" unless edits_allowed
-      edits_allowed = true
+    if status != :battery and status != :bad_network
+      case status
+      when :shutdown
+        $log.puts "Edits are prohibited..."
+        edits_allowed = false
 
-    when :shutdown
-      $log.puts "Edits are prohibited..."
-      edits_allowed = false
+      when :good
+        $log.puts "Edits are allowed again :)" unless edits_allowed
+        edits_allowed = true
+
+        # Perform editing
+        editor.perform_edits!
+      end
+
+      # Check if my changes were reverted,
+      # and maybe do something about that.
+      editor.check_previous_edits!
+
+      # Upload my stats
+      editor.upload_stats!
     end
-
-    # Perform editing
-    if edits_allowed
-      editor.perform_edits!
-    end
-
-    # Check if my changes were reverted,
-    # and maybe do something about that.
-    editor.check_previous_edits!
-
-    # Upload my stats
-    editor.upload_stats!
 
     # Save the database to persistent storage
     editor.save DB_DIR
+
+    case status
+    when :battery
+      $log.puts "Idle: on battery power..."
+      sleep_or_cancel BATTERY_WAIT
+    when :bad_network
+      $log.puts "Idle: network is down..."
+      sleep_or_cancel NETWORK_WAIT
+    end
   end
 
   editor.receive_all_links $q
@@ -185,6 +182,8 @@ $log.puts
 
 trap_signals
 save_pid PID_FILE
+
+$log.flush
 
 scraper_pid = editor_pid = nil
 $q = ObjectQueue.new
@@ -227,6 +226,4 @@ $q.close_receiver
 File.delete PID_FILE
 $log.puts "Shutdown: #{Time.now}"
 $log.flush
-
-
 

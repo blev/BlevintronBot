@@ -55,6 +55,8 @@ def on_battery_power?
 end
 
 def emergency_shutdown_check
+  return :battery if on_battery_power?
+
   page,date = retrieve_page SHUTDOWN_URL
 
   if page == nil
