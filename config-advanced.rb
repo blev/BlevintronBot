@@ -17,7 +17,7 @@ BATTERY_WAIT = 60.seconds
 NETWORK_WAIT = 60.seconds
 
 # Upper bound on idle waits
-MAX_IDLE_WAIT = 10.minutes
+MAX_IDLE_WAIT = 3.minutes
 
 # -------------- Retry on error
 

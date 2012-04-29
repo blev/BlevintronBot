@@ -104,6 +104,7 @@ def scraper_task
   File.delete SCRAPER_PID_FILE
   $log.puts "Shutdown scraper: #{Time.now}"
   $log.flush
+  exit
 end
 
 def editor_task
@@ -174,6 +175,7 @@ def editor_task
   File.delete EDITOR_PID_FILE
   $log.puts "Shutdown editor: #{Time.now}"
   $log.flush
+  exit
 end
 
 

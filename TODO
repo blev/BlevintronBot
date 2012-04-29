@@ -1,5 +1,6 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
+Cancel on retry?
 
 TESTING ------------------------------------------------------------------
 
@@ -104,6 +105,7 @@ Make DB.save scale better.
     - fragment @bad somehow?  by date of insertion?
     - make @bad records simpler/smaller?
       article => [url, [trialdate, result]]
+        no. will only introduce bugs.
 
 Make DB.save faster
     - (one time) cull those links from @bad which

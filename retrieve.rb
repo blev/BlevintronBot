@@ -36,7 +36,7 @@ HTTP_RETRY_ERRORS = ['Connection reset by peer', 'end of file reached', 'Broken 
 HTTP_IDEMPOTENT_RETRY_ERRORS = HTTP_RETRY_ERRORS + ['wrong status line']
 
 # A set of errors for which retry cannot help
-HTTP_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known', 'Connection timed out - connect(2)']
+HTTP_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known', 'Connection timed out - connect(2)', 'execution expired']
 
 # MediaWikia API errors
 API_RETRY_ERRORS = ['unknownerror', 'ratelimited', 'readonly', 'hookaborted']
@@ -345,7 +345,7 @@ def retrieve_post(uri, args, http_in=nil, extra_headers={})
           end
 
         rescue Exception => e
-          $log.puts "- exception in retrieve_post: #{e} #{e.backtrace}"
+          $log.puts "- exception in retrieve_post: #{e}"
           err = e.to_s.sub(/:.*$/m, '')
           try_again = true if HTTP_RETRY_ERRORS.include? err
         end
@@ -354,7 +354,7 @@ def retrieve_post(uri, args, http_in=nil, extra_headers={})
       end
     end
   rescue Exception => e
-    $log.puts "Exception during connect in retrieve_post: #{e} #{e.backtrace}"
+    $log.puts "Exception during connect in retrieve_post: #{e}"
     return [e.to_s, nil]
   end
 
