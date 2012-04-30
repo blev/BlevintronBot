@@ -66,8 +66,10 @@ class Scraper
       end
 
       # If we get too much of a back log,
-      # we starve the other tasks.
-      break if nChecked > 100
+      # we starve the other tasks, and there
+      # is a greater risk that we will crash
+      # before we save progress to disk.
+      break if nChecked > 250
     end
 
     # If anything is left in ready
