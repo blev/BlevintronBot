@@ -273,7 +273,7 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
               end
 
             else
-              $log.puts "#{resp.code}, Failed." unless silent
+              $log.puts resp.code unless silent
             end
           end
 
