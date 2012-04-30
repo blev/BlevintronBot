@@ -232,7 +232,7 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
             req[k] = v
           end
 
-          $log.print "Retrieving '#{uri.to_s}'... " unless silent
+          $log.print "GET '#{uri.pretty}': " unless silent
           http.start unless http.started?
           http.request req do |resp|
 
@@ -323,7 +323,7 @@ def retrieve_post(uri, args, http_in=nil, extra_headers={})
 
           req.set_post_data args
 
-          $log.print "Retrieving POST '#{uri}'... "
+          $log.print "POST '#{uri.pretty}': "
           http.start unless http.started?
           http.request req do |resp|
             if resp.code =~ /^5\d\d$/
@@ -474,7 +474,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
           req[k] = v
         end
 
-        $log.print "Retrieving HEAD '#{uri.to_s}'... " unless silent
+        $log.print "HEAD '#{uri.pretty}': " unless silent
         http.start unless http.started?
         http.request req do |resp|
           if resp.code !~ /^4\d\d$/ and resp.code !~ /^5\d\d$/

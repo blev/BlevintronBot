@@ -201,6 +201,8 @@ class Editor
       end
     end
 
+    $log.puts "'#{name}': '#{message}'"
+
     # Compose some letters, asking other contributors
     # for help with these broken links.
     letters = compose_solicitations(
@@ -258,7 +260,7 @@ private
 
     return if $cancel
 
-    $log.puts "COMMIT: '#{name}' in case #{ expcase }"
+    $log.puts "COMMIT: '#{name}' '#{message}' in case #{ expcase }"
 
     # Commit changes to wikipedia
     unless expcase.no_connect?

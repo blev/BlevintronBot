@@ -6,6 +6,7 @@
 ## Description:  utility methods
 
 require 'pp'
+require 'uri'
 
 class File
 
@@ -390,6 +391,16 @@ def linewrap fout, str, width = DIFF_COLUMN_WRAP
       line = line[ col2 .. -1]
     end
     fout.puts line
+  end
+end
+
+class URI::HTTP
+  def pretty
+    s = self.to_s
+    if s.start_with? 'http://'
+      s = s[7..-1]
+    end
+    s
   end
 end
 
