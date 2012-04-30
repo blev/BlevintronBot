@@ -395,11 +395,12 @@ def linewrap fout, str, width = DIFF_COLUMN_WRAP
 end
 
 class URI::HTTP
+  # Shorthand format.  Implicity http, and pseudo-schemes for wikipedia.
   def pretty
     s = self.to_s
-    if s.start_with? 'http://'
-      s = s[7..-1]
-    end
+    s.sub!(/^http:\/\/#{WIKI_LANGUAGE_CODE}\.wikipedia\.org/, 'WP:')
+    s.sub!(/^https:\/\/#{WIKI_LANGUAGE_CODE}\.wikipedia\.org/, 'WPS:')
+    s.sub!(/^http:\/\//, '')
     s
   end
 end
