@@ -364,6 +364,19 @@ private
       end
     end
 
+    # Determine number of contributions this user has
+    # made over the last N months.
+    if USER_INACTIVITY_THRESHOLD
+      last_contrib = retrieve_contributions user, 1, @connection
+      if last_contrib.empty? or
+         last_contrib.first[2] == nil or # timestamp nil?
+         (Time.now - last_contrib.first[2]) >= USER_INACTIVITY_THRESHOLD
+
+        $log.puts "(USER_INACTIVITY_THRESHOLD) User #{user} is inactive."
+        return 'USER_INACTIVITY_THRESHOLD'
+      end
+    end
+
     # Has the user excluded talk messages?
     # - via their User_talk: page
     user_talk = "User_talk:#{user}"
@@ -391,19 +404,6 @@ private
     if page and wiki_is_bot_page? page
       $log.puts "User #{user} is a bot"
       return 'Bot User'
-    end
-
-    # Determine number of contributions this user has
-    # made over the last N months.
-    if USER_INACTIVITY_THRESHOLD
-      last_contrib = retrieve_contributions user, 1, @connection
-      if last_contrib.empty? or
-         last_contrib.first[2] == nil or # timestamp nil?
-         (Time.now - last_contrib.first[2]) >= USER_INACTIVITY_THRESHOLD
-
-        $log.puts "(USER_INACTIVITY_THRESHOLD) User #{user} is inactive."
-        return 'USER_INACTIVITY_THRESHOLD'
-      end
     end
 
     # All other cases are unfiltered.
