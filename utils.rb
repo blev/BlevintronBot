@@ -400,6 +400,7 @@ class URI::HTTP
     s = self.to_s
     s.sub!(/^http:\/\/#{WIKI_LANGUAGE_CODE}\.wikipedia\.org/, 'WP:')
     s.sub!(/^https:\/\/#{WIKI_LANGUAGE_CODE}\.wikipedia\.org/, 'WPS:')
+    s.sub!(/^http:\/\/wayback\.archive\.org/, 'WAYBACK:')
     s.sub!(/^http:\/\//, '')
     s
   end
