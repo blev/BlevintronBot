@@ -9,6 +9,7 @@ bad_pages = [
   'Baku',
   'List of Brigham Young University alumni',
   '1998 FIFA World Cup qualification (UEFA)',
+  'Statewide opinion polling for the Republican Party presidential primaries, 2012',
   ]
 
 bad_pages.each do |article|
