@@ -160,11 +160,7 @@ class Scraper
       $log.print "Saving database to persistent storage... "
 
       # Make directory, if it doesn't already exist.
-      begin
-        Dir.mkdir dir
-      rescue Exception => e
-        # directory already exists
-      end
+      Dir.mkdir_p dir
 
       # Save robots.txt cache
       if robots_dirty?
@@ -364,11 +360,7 @@ class Editor
       $log.print "Saving database to persistent storage... "
 
       # Make directory, if it doesn't already exist.
-      begin
-        Dir.mkdir dir
-      rescue Exception => e
-        # directory already exists
-      end
+      Dir.mkdir_p dir
 
       # Save the bad links
       if bad_links_dirty?
