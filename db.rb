@@ -241,7 +241,6 @@ class Scraper
     delay = EPSILON_WAIT if delay < EPSILON_WAIT
     delay = MAX_IDLE_WAIT if delay > MAX_IDLE_WAIT
 
-    $log.puts "sleeping #{ delay.ceil } seconds"
     sleep_or_cancel delay
   end
 
@@ -341,6 +340,7 @@ class Editor
     end
 
     @scraper_is_done = false
+    @editTimes = []
   end
 
   def self.load(dir)
@@ -486,7 +486,7 @@ class Editor
   end
 
   def next_action_time
-    [next_edit_time].compact.min
+    [next_start_edit_time].compact.min
   end
 
   def wait
@@ -500,7 +500,6 @@ class Editor
     delay = EPSILON_WAIT if delay < EPSILON_WAIT
     delay = MAX_IDLE_WAIT if delay > MAX_IDLE_WAIT
 
-    $log.puts "sleeping #{ delay.ceil } seconds"
     sleep_or_cancel delay
   end
 
@@ -515,12 +514,18 @@ class Editor
     sumRevert = @numRevertedEdits + @numNonRevertedEdits
     if sumRevert > 0
       revertRate = @numRevertedEdits.to_f / sumRevert
-      
       $log.puts "  (#{@numRevertedEdits} reverted : #{ @numNonRevertedEdits } not reverted == #{ sprintf "%.3f", revertRate } revert rate)"
     end
 
     $log.puts "Total solicitations sent: #{@numSolicitations}"
     $log.puts
+
+    period = estimate_edit_period
+    if period
+      edits_per_year = (1.years / period).to_i
+      $log.puts "Observed edit period: 1 edit / #{sprintf "%.1f", period} seconds (#{edits_per_year}/year)"
+      $log.puts
+    end
 
     if ENABLE_EDITS_TO_LIVE_SITE
       $log.puts "Edits to live site: ENABLED"
@@ -533,6 +538,19 @@ class Editor
   end
 
 private
+
+  def estimate_edit_period
+    return nil if @editTimes.size < 2
+
+    # Moving window
+    if @editTimes.size > 25
+      @editTimes = @editTimes[ -25 .. -1 ]
+    end
+
+    # Average
+    duration = @editTimes.last - @editTimes.first
+    duration.to_f / (@editTimes.size - 1)
+  end
 
   def not_dirty!
     @bad_links_dirty = false

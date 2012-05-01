@@ -19,6 +19,9 @@ NETWORK_WAIT = 60.seconds
 # Upper bound on idle waits
 MAX_IDLE_WAIT = 3.minutes
 
+# Timeout during emergency shutdown
+EMERGENCY_SHUTDOWN_WAIT = 1.minutes
+
 # -------------- Retry on error
 
 # If an HTTP request fails, try again

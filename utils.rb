@@ -170,6 +170,9 @@ class Time
 end
 
 def sleep_or_cancel n
+  return if n <= 0
+
+  $log.puts "sleeping #{ n.ceil } seconds"
   while n >= 1
     return if $cancel
 

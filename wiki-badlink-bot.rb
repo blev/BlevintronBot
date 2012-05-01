@@ -114,14 +114,6 @@ def editor_task
 
     editor.print_edit_stats
 
-    # Keep CPU, Network utilization low
-    editor.wait
-    break if $cancel
-
-    # Dequeue link objects sent over the queue
-    # from the scraper task
-    editor.receive_links $q
-
     # Contact my emergency shutdown page.
     status = emergency_shutdown_check
 
@@ -130,6 +122,8 @@ def editor_task
       when :shutdown
         $log.puts "Edits are prohibited..."
         edits_allowed = false
+
+        sleep_or_cancel EMERGENCY_SHUTDOWN_WAIT
 
       when :good
         $log.puts "Edits are allowed again :)" unless edits_allowed
@@ -146,6 +140,10 @@ def editor_task
       # Upload my stats
       editor.upload_stats!
     end
+
+    # Dequeue link objects sent over the queue
+    # from the scraper task
+    editor.receive_links $q
 
     # Save the database to persistent storage
     editor.save DB_DIR

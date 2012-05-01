@@ -1,6 +1,19 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
-Cancel on retry?
+In terms of searching for archive copies, sending notifications:
+  http://www.example.com and http://www.example.com/ should be
+  considered equivalent modulo trailing slash, since both indicate
+  empty path, query and fragment.
+
+$cancel vs retry?
+$cancel vs http timeout?
+  - much of this boils down to how the implementors of ruby's
+    Net::HTTP chose to handle interrupts.
+
+cleanup: remove some stupid, dated, half-baked ideas
+  - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
+  - soft-start limit on questionable links
+
 
 TESTING ------------------------------------------------------------------
 
@@ -50,11 +63,6 @@ subst/transclude subject lines
 collect list of articles with common typos.  post those somewhere.
   then, I can go in as an editor and make those edits to build
   good faith
-
-
-cleanup: remove some stupid, dated, half-baked ideas
-  - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
-  - soft-start limit on questionable links
 
 save all items from previous_edits to a data page somewhere.
 
@@ -757,4 +765,9 @@ Split the bot into two processes:
     - determine some way to share the $cancel variable across processes.
       unnecessary.
 
+better rate management in the editor thread:
+  - why wait 30 seconds at top of loop when
+    the task of looking up stuff in the archives
+    could fill that time.
+  DONE
 

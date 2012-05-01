@@ -26,31 +26,26 @@ require 'fix'
 class Editor
 
   def perform_edits!
-    nIters = 0
-    maxIters = 10
+    return if $cancel
+
+    unless should_start_edit?
+      wait
+      return
+    end
 
     article_set = (LIMIT_EDIT_ARTICLES || @bad.keys)
     ready_articles = article_set.select {|art| article_ready? art}
-    return if ready_articles.empty?
+    if ready_articles.empty?
+      $log.puts "Nothing to edit."
+      wait
+      return
+    end
 
-    while true
-      break if nIters > maxIters # prevent insanity
-      break unless should_edit?
-      break if $cancel
+    $log.puts "Selecting an article to edit..."
 
-      if nIters > 1
-        sleep_or_cancel EPSILON_WAIT
-      end
-
-      $log.puts "Selecting an article to edit..."
-
-      article = ready_articles[ rand( ready_articles.size ) ]
-      if article_ready? article
-        result = edit_one_article! article
-        break if result == :maxlag
-      end
-
-      nIters += 1
+    article = ready_articles[ rand( ready_articles.size ) ]
+    if article_ready? article
+      edit_one_article! article
     end
 
     manage_bad_links
@@ -215,30 +210,38 @@ class Editor
     # For diagnostic/auditing purposes
     save_diffs this_edit, body, new_body, introductions, letters
 
+    duration = Time.now - start_time
+    $log.puts "Prepared for edit in #{duration} seconds"
+    $log.puts
+
     # Save the changes to wikipedia
     commit_edits! this_edit, new_body, letters, remaining_links
 
-    duration = Time.now - start_time
-    $log.puts "Edit took #{duration} seconds"
-    $log.puts
     nil
   end
 
 private
 
   def commit_edits! this_edit, new_body,letters, remaining_links
-    name    = this_edit.title
-    old_rev = this_edit.old_rev_time
-    message = this_edit.message
-    expcase = this_edit.experiment_case
+
+    # Throttle the edit rate
+    sleep_or_cancel (next_edit_time - Time.now)
+
+    start_time = Time.now
 
     # Record edit stats which may throttle future edits
     # (even though we don't know if they will be performed / succeed)
     edit_dirty!
     @numEditsOnLastDay = numEditsToday + 1
-    @lastEdit = Time.now
+    @lastEdit = start_time
+    @editTimes << start_time
 
-    return unless ENABLE_EDITS_TO_LIVE_SITE
+    unless ENABLE_EDITS_TO_LIVE_SITE
+      $log.puts
+      $log.puts "Edits to live site disabled."
+      $log.puts
+      return
+    end
 
     if TRIAL_MAX_EDITS
       if @numEdits >= TRIAL_MAX_EDITS
@@ -259,6 +262,12 @@ private
     end
 
     return if $cancel
+
+
+    name    = this_edit.title
+    old_rev = this_edit.old_rev_time
+    message = this_edit.message
+    expcase = this_edit.experiment_case
 
     $log.puts "COMMIT: '#{name}' '#{message}' in case #{ expcase }"
 
@@ -349,6 +358,15 @@ private
       add_stat key, 'introductions_distict_users', letters.size
       add_stat key, 'num_solicitations', this_edit.solicitations.size
     end
+
+    duration = Time.now - start_time
+    $log.puts "Commit edit in #{duration} seconds"
+    $log.puts
+  end
+
+  def should_start_edit?
+    net = next_start_edit_time
+    (net != nil) and (net <= Time.now)
   end
 
   def should_edit?
@@ -361,8 +379,6 @@ private
       return nil
 
     else
-      now = Time.now
-
       instantaneous_limit = @lastEdit + edit_period
 
       daily_limit = nil
@@ -379,6 +395,13 @@ private
       $log.puts "* Next edit at #{t}"
       return t
     end
+  end
+
+  def next_start_edit_time
+    net = next_edit_time
+
+    return nil if net==nil
+    (net - edit_period)
   end
 
   def edit_starved?
