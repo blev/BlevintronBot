@@ -182,6 +182,17 @@ SAVE_DB_FORMAT = '.marshal.gz'
 NUM_FRAGMENTS = 6
 
 # --------------- Editing
+
+# An estimate of the time it takes to prepare for an edit
+# (i.e. scraping article and history from wikipedia,
+# searching for archive replacements, etc.)
+# The bot behaves correctly, even if this estimate is
+# bad.
+# If you under-estimate, you get less than optimal
+# edit rate.  If you over-estimate, you increase your
+# risk of an edit conflict.
+ESTIMATED_EDIT_PREPARE_LATENCY = 30.seconds
+
 # --------------- Replacing links with archive copies
 
 # If an archive copy is found, and that archive

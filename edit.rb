@@ -401,7 +401,7 @@ private
     net = next_edit_time
 
     return nil if net==nil
-    (net - edit_period)
+    (net - ESTIMATED_EDIT_PREPARE_LATENCY)
   end
 
   def edit_starved?
