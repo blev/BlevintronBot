@@ -45,28 +45,20 @@ def compute_diffs(original, modified, fout='')
     #   - A template
     #   - A table row
     #   - The line itself.
-    done = false
     if_within_ref modified, pattern, offset do |first,close|
       contexts << [ first, close ]
-      done = true
-    end
-    next if done
 
-    if_within_template modified, pattern, offset do |template|
+    end or if_within_template modified, pattern, offset do |template|
       contexts << [ template.start_offset, template.end_offset+1 ]
-      done = true
-    end
-    next if done
 
-    if_within_table_row modified, pattern, offset do |first,close|
+    end or if_within_table_row modified, pattern, offset do |first,close|
       contexts << [ first, close ]
-      done = true
-    end
-    next if done
 
-    begin_line = (modified.rindex("\n", offset) || -1)+1
-    end_line = modified.index("\n", offset+pattern.size) || (modified.size-1)
-    contexts << [ begin_line, end_line ]
+    end or begin
+      begin_line = (modified.rindex("\n", offset) || -1)+1
+      end_line = modified.index("\n", offset+pattern.size) || (modified.size-1)
+      contexts << [ begin_line, end_line ]
+    end
   end
 
   # Combine contexts if they overlap
