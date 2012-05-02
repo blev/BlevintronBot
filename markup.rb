@@ -210,26 +210,30 @@ end
 def if_within_brackets body, pattern, offset
   # Find the corresponding ']'
   last = body.index(']', offset + pattern.size)
-  return if last == nil
+  return false if last == nil
 
   # Find the last '[' which precedes the occurrence
   first = body.rindex('[', last)
-  return if first == nil
-  return if offset <= first
+  return false if first == nil
+  return false if offset <= first
 
   unless is_unparsed? body, body[first..last], first
     yield [first,last]
+    return true
   end
+  false
 end
 
 def if_within_template body, pattern, offset
   body.each_template :must_start_before=>offset, :must_end_after=>offset+pattern.size do |tl|
     if tl.start_offset < offset
       if offset + pattern.size < tl.end_offset+2
-        return yield tl
+        yield tl
+        return true
       end
     end
   end
+  false
 end
 
 def if_followed_by_template body, pattern, offset
@@ -237,28 +241,31 @@ def if_followed_by_template body, pattern, offset
     if offset + pattern.size <= tl.start_offset
       between = body[ offset + pattern.size ... tl.start_offset ].strip
       if between == ''
-        return yield tl
+        yield tl
+        return true
       end
     end
   end
+  false
 end
 
 def if_within_ref body, pattern, offset
   # Find the corresponding </ref>
   last = body.index(/<\s*\/\s*ref\s*>/i, offset + pattern.size)
-  return if last == nil
+  return false if last == nil
 
   # Find first occurrence of <ref before the occurrence
   first = body.rindex(/<\s*ref/i, last)
-  return if first == nil
-  return if offset < first
+  return false if first == nil
+  return false if offset < first
 
   # TODO: <ref name="foo" />
 
   close = body.index('>', last)
-  return if close == nil
+  return false if close == nil
 
   yield [first, close]
+  true
 end
 
 def if_within_table_row body,pattern,offset
@@ -266,14 +273,15 @@ def if_within_table_row body,pattern,offset
   next_row = body.index("\n|-", offset)
   end_table = body.index("\n|}", offset)
   last = [next_row, end_table].compact.min
-  return if last == nil
+  return false if last == nil
 
   # Find either beginning of this row "\n|-"
   first = body.rindex("\n|-", last-1)
-  return if first == nil
-  return if offset < first
+  return false if first == nil
+  return false if offset < first
 
   yield [first, last]
+  true
 end
 
 # Pull all distinct URLs from the body of an article,
