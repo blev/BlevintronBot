@@ -63,11 +63,12 @@ def compute_diffs(original, modified, fout='')
 
   # Combine contexts if they overlap
   non_overlapping_contexts = []
-  contexts.sort! {|a,b| a[0] <=> b[0]}
+  contexts.sort! {|a,b| a.first <=> b.first}
   until contexts.empty?
     head = contexts.shift
     while (not contexts.empty?) and head.last + 1 >= contexts.first.first
-      head = [head.first, contexts.shift.last]
+      lim = [head.last, contexts.shift.last].max
+      head = [head.first, lim]
     end
     non_overlapping_contexts << head
   end
