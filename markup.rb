@@ -269,7 +269,7 @@ def if_within_table_row body,pattern,offset
   return if last == nil
 
   # Find either beginning of this row "\n|-"
-  first = body.rindex("\n|-", last)
+  first = body.rindex("\n|-", last-1)
   return if first == nil
   return if offset < first
 
