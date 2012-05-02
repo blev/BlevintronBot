@@ -109,6 +109,7 @@ class Editor
     introductions = search_history name, broken_uris
     # some error while retrieving history.
     return nil if introductions.empty?
+    return nil if $cancel
 
     # Try to find an access date for every broken link
     need_archive = []
@@ -125,6 +126,7 @@ class Editor
 
     # Look-up archive URLs
     replacements = find_archive_urls need_archive
+    return nil if $cancel
 
     # Try to fix each problem link
     new_body = body
@@ -136,6 +138,7 @@ class Editor
     total_marked = 0
     total_unfixed = 0
     contributing_bad_links.each do |link|
+      return nil if $cancel
       $log.puts "    This article contains problem link: #{link.url}"
 
       replacement = replacements[ link.url ] || [nil,nil]

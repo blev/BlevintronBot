@@ -178,6 +178,8 @@ def find_archive_urls urls
       reconnect(URI.parse WEBCITE_PREFIX) do |webcite_http|
         # Search all URLs
         urls.each do |date,url|
+          return result if $cancel
+
           rd, ru = find_archive_url url, date, archive_search_http, archive_confirm_http, webcite_http
           result[url] = [rd,ru] if ru
         end

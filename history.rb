@@ -94,6 +94,8 @@ def search_history( article, patterns_in, http_in = nil )
     # until we find a revision which does not contain
     # ANY of these patterns.
     while true
+      return introductions if $cancel
+
       # Did these patterns exist before these revisions?
       oldest_revision_id = revisions.first[0]
       nGetArticle += 1
@@ -155,6 +157,8 @@ def search_history( article, patterns_in, http_in = nil )
 
     # Until we know an introduction for EVERY pattern
     while patterns.size > introductions.size
+      return introductions if $cancel
+
       # Select any pattern which is not yet determined.
       some_pattern = patterns.select {|pat| not introductions.has_key? pat}.first
 
