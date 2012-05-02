@@ -261,6 +261,21 @@ def if_within_ref body, pattern, offset
   yield [first, close]
 end
 
+def if_within_table_row body,pattern,offset
+  # Find either (i) next row "\n|-" or (ii) end of table "\n|}"
+  next_row = body.index("\n|-", offset)
+  end_table = body.index("\n|}", offset)
+  last = [next_row, end_table].compact.min
+  return if last == nil
+
+  # Find either beginning of this row "\n|-"
+  first = body.rindex("\n|-", last)
+  return if first == nil
+  return if offset < first
+
+  yield [first, last]
+end
+
 # Pull all distinct URLs from the body of an article,
 def extract_urls body
   # Look for URLs within this document.
