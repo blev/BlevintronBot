@@ -1,0 +1,22 @@
+#!/usr/bin/ruby -w
+
+require 'diffs'
+require 'db'
+
+article =  ARGV[0] || 'Follow the Nightingale'
+oldrev  = (ARGV[1] || 460710300).to_i
+newrev  = (ARGV[2] || 488580369).to_i
+
+before = after = ''
+
+reconnect INSECURE_API_URL do |http|
+  before,date = retrieve_revision article, oldrev, http
+  after,date  = retrieve_revision article, newrev, http
+end
+
+diffs = compute_diffs before,after
+
+File.open 'diffs.wikitext', 'w' do |fout|
+  fout.puts diffs
+end
+
