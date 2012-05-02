@@ -253,6 +253,8 @@ def if_within_ref body, pattern, offset
   return if first == nil
   return if offset < first
 
+  # TODO: <ref name="foo" />
+
   close = body.index('>', last)
   return if close == nil
 

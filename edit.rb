@@ -225,7 +225,7 @@ private
   def commit_edits! this_edit, new_body,letters, remaining_links
 
     # Throttle the edit rate
-    sleep_or_cancel (next_edit_time - Time.now)
+    sleep_or_cancel(next_edit_time - Time.now)
 
     start_time = Time.now
 

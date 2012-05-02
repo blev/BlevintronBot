@@ -4,9 +4,8 @@
 (0) Required software:
     I've tested this on Ruby 1.8.7.
     I've tested this on Ubuntu 9-ish
-    It expects that the standard unix utilities
-      'cat', 'diff', 'gzip', 'tar' are installed.
-        (assume that tar accepts the -j (bzip2) and --remove-files flag.)
+    It expects the standard utility 'diff'
+    It expects a version of 'tar' that accepts the -j (bzip2) and --remove-files flag.
     If you wish to handle CAPTCHAs
       (i.e. with CAPTCHA_USER_TIMEOUT>0),
       then you need an image viewer.  By default,
