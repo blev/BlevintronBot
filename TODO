@@ -2,6 +2,8 @@ BLOCKING FEATURES / BUGS -------------------------------------------------
 
 Correctly handle named refs: <ref name="foo" />
 
+Some editors mark a replacement link by adding [http://archive/foo/bar mirror] after the dead link/{{Cite}}/etc.
+
 Make it easier to review:
   collect all diffs, and a context relative-to wikitext structure,
   and put it all onto some page.
@@ -20,18 +22,7 @@ cleanup: remove some stupid, dated, half-baked ideas
   - LIMIT_CONTACT_USERTALK, LIMIT_EDIT_ARTICLES, ...
   - soft-start limit on questionable links
 
-
 TESTING ------------------------------------------------------------------
-
-At least two bad edits due to URLs that end with right-paren )
-  done
-
-maintain a list of special cases for weird templates.
-  table driven placement of {{Dead link}} or {{Wayback}}
-  compromise: BOYCOTT_TEMPLATES, TAG_AFTER_TEMPLATES
-  done
-  puts tags /after/ {{URL}}
-    done
 
 TABLED -------------------------------------------------------------------
 
@@ -776,4 +767,15 @@ better rate management in the editor thread:
     the task of looking up stuff in the archives
     could fill that time.
   DONE
+
+At least two bad edits due to URLs that end with right-paren )
+  done
+
+maintain a list of special cases for weird templates.
+  table driven placement of {{Dead link}} or {{Wayback}}
+  compromise: BOYCOTT_TEMPLATES, TAG_AFTER_TEMPLATES
+  done
+  puts tags /after/ {{URL}}
+    done
+
 
