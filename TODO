@@ -7,8 +7,9 @@ Make it easier to review:
   and put it all onto some page.
   - generate context-relative diffs: DONE
   - summarize an item from @previous_edits: DONE
-  - collect diffs for all items in @previous_edits
-  - post diffs to some user page
+  - collect diffs for all items in @previous_edits: DONE
+  - write driver script to collect those diffs: DONE
+  - post diffs to some user page: DONE, though disabled for now
 
 In terms of searching for archive copies, sending notifications:
   http://www.example.com and http://www.example.com/ should be

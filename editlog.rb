@@ -247,19 +247,19 @@ class EditLogEntry
   end
 
   def summarize(http_in=nil, fout='')
-    return nil unless @new_revision_id
+    return fout unless @new_revision_id
 
     reconnect(INSECURE_API_URL, http_in) do |http|
       # Find the ID of the revision before my edit.
       revs = retrieve_history @title, http, nil, @new_revision_id, 2
-      return nil if revs.size != 2
+      return fout if revs.size != 2
       old_revid, new_revid = revs.first[0], revs.last[0]
 
       # Fetch the before/after revisions
       old_rev,date = retrieve_revision @title, old_revid, http
-      return nil if old_rev == nil
+      return fout if old_rev == nil
       new_rev,date = retrieve_revision @title, new_revid, http
-      return nil if new_rev == nil
+      return fout if new_rev == nil
 
       # New section
       fout << "==#{@title}==\n"
@@ -288,6 +288,18 @@ class EditLogEntry
 
 end
 
+class Editor
+  def summarize_recent_edits(fout='', http_in=nil)
+    return fout if @previous_edits.empty?
 
+    reconnect(INSECURE_API_URL,http_in) do |http|
+      @previous_edits.each_pair do |title, entry|
+        entry.summarize(http,fout)
+      end
+    end
+
+    fout
+  end
+end
 
 
