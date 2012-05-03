@@ -4,6 +4,9 @@ Some editors mark a replacement link by adding [http://archive/foo/bar mirror] a
 
 Refactor Api:
   Keep authentication tokens longer
+    DONE
+  Detect if authenticated session has expired
+
 
 Consider the benefits of Special:Export
   Possibly refactor scraper

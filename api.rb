@@ -15,29 +15,28 @@ require 'retrieve'
 require 'multipart'
 
 class Session
-  def initialize
+  attr_writer :connection
+
+  def initialize(u,p)
+    @username = u
+    @password = p
     @connection = nil
     login_failed!
   end
 
-  def login(u,p)
-    return if logged_in?
+  def login
+    logout if stale?
+    return true if logged_in?
 
     begin
       $log.puts "Login..."
 
-      uri = SECURE_API_URL
-      @connection = Net::HTTP.new( uri.host, uri.port )
-      if uri.scheme == 'https'
-        @connection.use_ssl = true
-        @connection.verify_mode = OpenSSL::SSL::VERIFY_NONE
-      end
-
-      result,token = try_login u,p
+      result,token = try_login
       if result == 'NeedToken'
-        result,token = try_login u,p,token
+        result,token = try_login token
       end
 
+      @login_time = Time.now
       return (result == 'Success')
 
     rescue Exception => e
@@ -47,6 +46,7 @@ class Session
     login_failed!
     return false
   end
+
 
   def logout
     return unless logged_in?
@@ -72,7 +72,7 @@ class Session
   #   ['Success', newRevisionIdInteger] on success
   #   ['Message', extra] on failure
   def replace(article, oldRevisionTime, message, newText)
-    throw 'must log in' unless logged_in?
+    return ['Failure', 'cannot login'] unless login
 
     if LIMIT_EDIT_ARTICLES
       unless LIMIT_EDIT_ARTICLES.include? article
@@ -146,12 +146,21 @@ class Session
     @logged_in
   end
 
+  def logged_out?
+    not logged_in?
+  end
+
 private
-  def try_login(u, p, token=nil)
+  def stale?
+    return false unless @login_time
+    (Time.now - @login_time) > LOGIN_TTL
+  end
+
+  def try_login(token=nil)
     args = {
       'action' => 'login',
-      'lgname' => u,
-      'lgpassword' => p
+      'lgname' => @username,
+      'lgpassword' => @password
     }
     args['lgtoken'] = token if token
 
@@ -180,6 +189,22 @@ private
     end
   end
 
+  def login_failed!
+    @logged_in = false
+    @cookies = {}
+    @editToken = nil
+
+    @login_time = nil
+  end
+
+  def parse_login_elt elt
+    prefix = REXML::Text.unnormalize elt.attribute('cookieprefix').to_s
+    @cookies[ "#{prefix}_session" ] = REXML::Text.unnormalize( ( elt.attribute('sessionid')  || '' ).to_s )
+    @cookies[ "#{prefix}UserName" ] = REXML::Text.unnormalize( ( elt.attribute('lgusername') || '' ).to_s )
+    @cookies[ "#{prefix}UserID" ]   = REXML::Text.unnormalize( ( elt.attribute('lguserid')   || '' ).to_s )
+    @cookies[ "#{prefix}Token" ]    = REXML::Text.unnormalize( ( elt.attribute('lgtoken')    || '' ).to_s )
+  end
+
   def cookie
     str = ''
     @cookies.each do |name,value|
@@ -189,25 +214,6 @@ private
       str << "#{name}=#{value}"
     end
     str
-  end
-
-  def login_failed!
-    if @connection and @connection.started?
-      @connection.finish
-    end
-
-    @logged_in = false
-    @cookies = {}
-    @editToken = nil
-    @connection = nil
-  end
-
-  def parse_login_elt elt
-    prefix = REXML::Text.unnormalize elt.attribute('cookieprefix').to_s
-    @cookies[ "#{prefix}_session" ] = REXML::Text.unnormalize( ( elt.attribute('sessionid')  || '' ).to_s )
-    @cookies[ "#{prefix}UserName" ] = REXML::Text.unnormalize( ( elt.attribute('lgusername') || '' ).to_s )
-    @cookies[ "#{prefix}UserID" ]   = REXML::Text.unnormalize( ( elt.attribute('lguserid')   || '' ).to_s )
-    @cookies[ "#{prefix}Token" ]    = REXML::Text.unnormalize( ( elt.attribute('lgtoken')    || '' ).to_s )
   end
 
   def editToken
@@ -222,7 +228,7 @@ private
   end
 
   def fetchEditToken
-    throw 'must log in' unless logged_in?
+    return ['Failure', 'cannot login'] unless login
 
     begin
       args = {
@@ -250,7 +256,7 @@ private
   #   ['Success', newRevisionIdInteger] on success
   #   ['Message', extra] on failure
   def append_section(article, sectionTitle, newText)
-    throw 'must log in' unless logged_in?
+    return ['Failure', 'cannot login'] unless login
 
     begin
       md5 = MD5.new
@@ -351,16 +357,23 @@ private
 end
 
 class Api
-  def self.session(username, password)
-    session = Session.new
+  # Global set of authenticated sessions
+  @@active_sessions = {}
 
-    begin
-      return false unless session.login(username,password)
+  def self.session(username, password, http_in=nil)
+    unless @@active_sessions.has_key? username
+      @@active_sessions[username] = Session.new(username,password)
+    end
 
-      yield session
+    s = @@active_sessions[username]
+    reconnect(SECURE_API_URL,http_in) do |http|
+      begin
+        s.connection = http
+        return yield s
 
-    ensure
-      session.logout
+      ensure
+        s.connection = nil
+      end
     end
   end
 end

@@ -22,6 +22,10 @@ MAX_IDLE_WAIT = 3.minutes
 # Timeout during emergency shutdown
 EMERGENCY_SHUTDOWN_WAIT = 1.minutes
 
+# -------------- How long are our authenticated sessions valid?
+
+LOGIN_TTL = 5.minutes
+
 # -------------- Retry on error
 
 # If an HTTP request fails, try again
