@@ -14,6 +14,9 @@ require 'config'
 require 'api'
 require 'retrieve'
 
+require 'history'
+require 'diffs'
+
 class ExperimentCase
   attr_reader :do_edit, :do_solicit
 
@@ -241,6 +244,46 @@ class EditLogEntry
       $log.puts " -- Annoyance: blocked from #{numBlocks} user pages / #{numAuthors} solicited users"
       numBlocks.to_f/numAuthors
     end
+  end
+
+  def summarize(http_in=nil, fout='')
+    return nil unless @new_revision_id
+
+    reconnect(INSECURE_API_URL, http_in) do |http|
+      # Find the ID of the revision before my edit.
+      revs = retrieve_history @title, http, nil, @new_revision_id, 2
+      return nil if revs.size != 2
+      old_revid, new_revid = revs.first[0], revs.last[0]
+
+      # Fetch the before/after revisions
+      old_rev,date = retrieve_revision @title, old_revid, http
+      return nil if old_rev == nil
+      new_rev,date = retrieve_revision @title, new_revid, http
+      return nil if new_rev == nil
+
+      # New section
+      fout << "==#{@title}==\n"
+      fout << "* Summary: ''#{@message}''.\n"
+      fout << "* Revisions: [#{link_to_old_revision @title,old_revid} before], "
+      fout << "[#{link_to_diff @title,new_revid} diff], "
+      fout << "[#{link_to_old_revision @title,new_revid} after].\n"
+      unless @solicitations.empty?
+        fout << "* Notifications: "
+        first = true
+        @solicitations.each do |sol_user, sol_id|
+          fout << ", " unless first
+          fout << "[#{link_to_diff "User talk:#{sol_user}", sol_id} #{sol_user}]"
+          first = false
+        end
+        fout << ".\n"
+      end
+
+      # Compute a diff
+      fout << "Diffs:\n\n"
+      compute_diffs old_rev,new_rev,fout
+    end
+
+    fout
   end
 
 end

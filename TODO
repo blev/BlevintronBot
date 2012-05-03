@@ -6,6 +6,7 @@ Make it easier to review:
   collect all diffs, and a context relative-to wikitext structure,
   and put it all onto some page.
   - generate context-relative diffs: DONE
+  - summarize an item from @previous_edits: DONE
   - collect diffs for all items in @previous_edits
   - post diffs to some user page
 
