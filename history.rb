@@ -282,14 +282,14 @@ end
 # either revision IDs or timestamps
 # Returns an array of 4-tuples: [revision-id, revision-date, author, comment]
 # Result ascending in time.
-def retrieve_history(article, http_in=nil, earliestRevId = nil, latestRevId = nil)
+def retrieve_history(article, http_in=nil, earliestRevId = nil, latestRevId = nil, limit=500)
   begin
     args = {
       "action"    => "query",
       "prop"      => "revisions",
       "titles"    => article,
       "rvprop"    => "ids|timestamp|user|comment",
-      "rvlimit"   => 500,
+      "rvlimit"   => limit,
       "rvdir"     => "older"
     }
 
