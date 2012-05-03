@@ -69,6 +69,8 @@ class Editor
       else
         bad_links << bad_link
       end
+
+      return nil if $cancel
     end
     if bad_links.empty?
       $log.puts "  This article has no more problem links"
