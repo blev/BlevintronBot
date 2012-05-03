@@ -259,8 +259,6 @@ def if_within_ref body, pattern, offset
   return false if first == nil
   return false if offset < first
 
-  # TODO: <ref name="foo" />
-
   close = body.index('>', last)
   return false if close == nil
 
@@ -406,12 +404,16 @@ def this_use_dead_or_archived? body,url,idx
     return true if tag.is_archive?
   end
 
+  # TODO followed by [http://archive.org mirror]
+
   if_within_brackets(body, url, idx) do |first,last|
     bracket_link = body[ first .. last ]
     if_followed_by_template(body, bracket_link, first) do |tag|
       return true if tag.is_dead?
       return true if tag.is_archive?
     end
+
+    # TODO followed by [http://archive.org mirror]
   end
 
   if_within_template(body, url, idx) do |tag|
@@ -427,6 +429,8 @@ def this_use_dead_or_archived? body,url,idx
         return true if tag.is_dead?
         return true if tag.is_archive?
       end
+
+      # TODO followed by [http://archive.org mirror]
     end
   end
 
@@ -435,6 +439,8 @@ def this_use_dead_or_archived? body,url,idx
       return true if tag.is_dead?
       return true if tag.is_archive?
     end
+
+    # TODO includes [http://archive.org mirror]
   end
 
   # We should have eliminated these already, right?
