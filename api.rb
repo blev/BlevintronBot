@@ -33,123 +33,29 @@ class Session
         @connection.verify_mode = OpenSSL::SSL::VERIFY_NONE
       end
 
-      # Ruby's Net::HTTP will only honor Connection: Keep-Alive
-      # If you .start the connection before you issue a .request.
-      # Why!?!?!
-      @connection.start
-
-      req = Net::HTTP::Post.new uri.request_uri
-      req['User-Agent'] = HONEST_USER_AGENT
-      req['Accept-Encoding'] = 'gzip'
-      req['Connection'] = 'Keep-Alive'
-
-      req.set_post_data({
-        'action' => 'login',
-        'lgname' => u,
-        'lgpassword' => p,
-        'format' => 'xml'
-      })
-
-      need_token = false
-      @connection.request req do |resp|
-        if resp.code != '200'
-          login_failed!
-          $log.puts "Login failed (1): status code #{ resp.code }"
-          return false
-        end
-
-        body = decode_response_body resp
-        xml = REXML::Document.new body
-        xml.elements.each('/api/login') do |elt|
-          result = elt.attribute('result').to_s
-
-          if result == 'Success'
-            parse_login_elt elt
-            @logged_in = true
-            $log.puts "... logged in"
-            return true
-
-          elsif result == 'NeedToken'
-            parse_login_elt elt
-            need_token = elt.attribute('token').to_s
-
-          else
-            login_failed!
-            $log.puts "Failed login (11): result=#{ result }"
-            return false
-          end
-        end
+      result,token = try_login u,p
+      if result == 'NeedToken'
+        result,token = try_login u,p,token
       end
 
-      if need_token
-        req = Net::HTTP::Post.new uri.request_uri
-        req['User-Agent'] = HONEST_USER_AGENT
-        req['Accept-Encoding'] = 'gzip'
-        req['Cookie'] = cookie
-        req['Connection'] = 'Keep-Alive'
-
-        req.set_post_data({
-          'action' => 'login',
-          'lgname' => u,
-          'lgpassword' => p,
-          'format' => 'xml',
-          'lgtoken' => need_token
-        })
-
-        @connection.request req do |resp|
-          if resp.code != '200'
-            login_failed!
-            $log.puts "Login failed (2): status code #{ resp.code }"
-            return false
-          end
-
-          body = decode_response_body resp
-          xml = REXML::Document.new body
-          xml.elements.each('/api/login') do |elt|
-            result = elt.attribute('result').to_s
-
-            if result == 'Success'
-              parse_login_elt elt
-              @logged_in = true
-              $log.puts "... logged in"
-              return true
-
-            else
-              login_failed!
-              $log.puts "Failed login (21): result=#{ result }"
-              return false
-            end
-          end
-        end
-      end
+      return (result == 'Success')
 
     rescue Exception => e
-      login_failed!
       $log.puts "Exception during login: #{e}"
-      return false
     end
 
+    login_failed!
+    return false
   end
 
   def logout
     return unless logged_in?
 
-    unless @connection.active?
-      $log.puts "  XXX.5 Why did connection close?"
-    end
-
     begin
       $log.puts "Logout..."
-      uri = SECURE_API_URL
-      req = Net::HTTP::Post.new uri.request_uri
-      req['User-Agent'] = HONEST_USER_AGENT
-      req['Accept-Encoding'] = 'gzip'
-      req['Cookie'] = cookie
-
-      req.set_post_data 'action' => 'logout'
-
-      @connection.request req do |resp|
-        $log.puts "... logout: #{resp.code}"
+      api_request SECURE_API_URL, {'action'=>'logout'}, @connection, {'Cookie'=>cookie} do |xml|
+        $log.puts "... logout."
+        return
       end
 
     ensure
@@ -241,6 +147,39 @@ class Session
   end
 
 private
+  def try_login(u, p, token=nil)
+    args = {
+      'action' => 'login',
+      'lgname' => u,
+      'lgpassword' => p
+    }
+    args['lgtoken'] = token if token
+
+    api_request SECURE_API_URL,args,@connection,{'Cookie'=>cookie} do |xml|
+      xml.elements.each('/api/login') do |elt|
+        result = elt.attribute('result').to_s
+
+        case result
+        when 'Success'
+          parse_login_elt elt
+          @logged_in = true
+          $log.puts "... logged in"
+          return ['Success',nil]
+
+        when 'NeedToken'
+          parse_login_elt elt
+          return ['NeedToken', elt.attribute('token').to_s]
+
+        else
+          $log.puts "Failed login (11): result=#{ result }"
+        end
+      end
+
+      login_failed!
+      return ['Failure',nil]
+    end
+  end
+
   def cookie
     str = ''
     @cookies.each do |name,value|

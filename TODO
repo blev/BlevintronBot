@@ -2,14 +2,12 @@ BLOCKING FEATURES / BUGS -------------------------------------------------
 
 Some editors mark a replacement link by adding [http://archive/foo/bar mirror] after the dead link/{{Cite}}/etc.
 
-Make it easier to review:
-  collect all diffs, and a context relative-to wikitext structure,
-  and put it all onto some page.
-  - generate context-relative diffs: DONE
-  - summarize an item from @previous_edits: DONE
-  - collect diffs for all items in @previous_edits: DONE
-  - write driver script to collect those diffs: DONE
-  - post diffs to some user page: DONE, though disabled for now
+Refactor Api:
+  Keep authentication tokens longer
+
+Consider the benefits of Special:Export
+  Possibly refactor scraper
+  Possibly refactor search_history
 
 In terms of searching for archive copies, sending notifications:
   http://www.example.com and http://www.example.com/ should be
@@ -26,6 +24,15 @@ cleanup: remove some stupid, dated, half-baked ideas
   - soft-start limit on questionable links
 
 TESTING ------------------------------------------------------------------
+
+Make it easier to review:
+  collect all diffs, and a context relative-to wikitext structure,
+  and put it all onto some page.
+  - generate context-relative diffs: DONE
+  - summarize an item from @previous_edits: DONE
+  - collect diffs for all items in @previous_edits: DONE
+  - write driver script to collect those diffs: DONE
+  - post diffs to some user page: DONE, though disabled for now
 
 TABLED -------------------------------------------------------------------
 
@@ -784,3 +791,9 @@ maintain a list of special cases for weird templates.
 
 Correctly handle named refs: <ref name="foo" />
   moot - we parse a pair of open-close ref; only makes mistakes for malformed wikitext anyhow
+
+Refactor Api:
+  Use api_request for login/logout actions.
+    DONE
+
+
