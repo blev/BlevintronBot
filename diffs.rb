@@ -86,7 +86,7 @@ def compute_diffs(original, modified, fout='')
     # to an article category.
     fout << strip_categories(ctx)
 
-    if ctx.start_with? "\n|-" and not ctx.end_with? "|}"
+    if ctx.start_with? "\n|-" and not ctx.include? "|}"
       # Wrap wiki-tables so they render correctly.
       fout << "\n|}"
     end
