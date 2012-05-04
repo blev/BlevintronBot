@@ -10,6 +10,8 @@ Make it easier to review:
   - collect diffs for all items in @previous_edits: DONE
   - write driver script to collect those diffs: DONE
   - post diffs to some user page: DONE, though disabled for now
+  - Explicitly mark it NOINDEX and {{User page}}: DONE
+  - Force-remove category membership: DONE
 
 TABLED -------------------------------------------------------------------
 
