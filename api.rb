@@ -89,7 +89,7 @@ class Session
         'action' => 'edit',
         'title' => article,
         'text' => newText,
-        'summary' => "BOT: #{message}.  [[User_talk:#{BOT_USERNAME} | Please report any problems]].", # to [[User_talk:#{OPERATOR_USERNAME}|#{OPERATOR_USERNAME}]].",
+        'summary' => "BOT: #{message}.  [[User_talk:#{BOT_USERNAME} | Please report any problems]].",
         'bot' => 'true',
         'md5' => md5.hexdigest,
         'assert' => 'user',
@@ -187,13 +187,15 @@ private
       login_failed!
       return ['Failure',nil]
     end
+
+    login_failed!
+    return ['Failure',nil]
   end
 
   def login_failed!
     @logged_in = false
     @cookies = {}
     @editToken = nil
-
     @login_time = nil
   end
 
@@ -208,7 +210,7 @@ private
   def cookie
     str = ''
     @cookies.each do |name,value|
-      next if value == nil
+      next if value == nil or value == ''
 
       str << '; ' unless str == ''
       str << "#{name}=#{value}"
@@ -356,8 +358,8 @@ private
   end
 end
 
+# This is basically an authentication pool
 class Api
-  # Global set of authenticated sessions
   @@active_sessions = {}
 
   def self.session(username, password, http_in=nil)

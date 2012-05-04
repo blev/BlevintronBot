@@ -177,7 +177,6 @@ def decode_response_body resp
   return nil if resp.body == nil
 
   if resp['content-encoding'] == 'gzip'
-#    $log.puts '- decompress [gzip] encoding'
     StringIO.open(resp.body, 'r') do |sin|
       begin
         gzin = Zlib::GzipReader.new sin
