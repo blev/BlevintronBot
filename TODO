@@ -1,10 +1,5 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
-$cancel vs retry?
-$cancel vs http timeout?
-  - much of this boils down to how the implementors of ruby's
-    Net::HTTP chose to handle interrupts.
-
 TESTING ------------------------------------------------------------------
 
 Make it easier to review:
@@ -17,6 +12,11 @@ Make it easier to review:
   - post diffs to some user page: DONE, though disabled for now
 
 TABLED -------------------------------------------------------------------
+
+$cancel vs retry?
+$cancel vs http timeout?
+  - much of this boils down to how the implementors of ruby's
+    Net::HTTP chose to handle interrupts.
 
 API:
   Detect if authenticated session has expired
