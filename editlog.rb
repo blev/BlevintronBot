@@ -288,18 +288,3 @@ class EditLogEntry
 
 end
 
-class Editor
-  def summarize_recent_edits(fout='', http_in=nil)
-    return fout if @previous_edits.empty?
-
-    reconnect(INSECURE_API_URL,http_in) do |http|
-      @previous_edits.each_pair do |title, entry|
-        entry.summarize(http,fout)
-      end
-    end
-
-    fout
-  end
-end
-
-

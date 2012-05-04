@@ -79,10 +79,16 @@ def compute_diffs(original, modified, fout='')
 
     if ctx.start_with? "\n|-"
       # Wrap wiki-tables so they render correctly.
-      fout << "{| class=\"wikitable\"" << ctx
-      fout << "|}" unless ctx.include? "|}"
-    else
-      fout << ctx.strip
+      fout << "{| class=\"wikitable\""
+    end
+
+    # We don't want to accidentally add our diff document
+    # to an article category.
+    fout << strip_categories(ctx)
+
+    if ctx.start_with? "\n|-" and not ctx.end_with? "|}"
+      # Wrap wiki-tables so they render correctly.
+      fout << "\n|}"
     end
 
     fout << "\n\n"
@@ -90,6 +96,12 @@ def compute_diffs(original, modified, fout='')
 
   fout << "<references/>\n"
   fout
+end
+
+# Remove category membership tags from a string.
+def strip_categories str
+  str.strip!
+  str.gsub!(/\[\[Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
 end
 
 # Return the length of the common prefix
@@ -113,4 +125,24 @@ def find_common_suffix(s1,s2)
   end
   i
 end
+
+
+class Editor
+  def summarize_recent_edits(fout='', http_in=nil)
+    return fout if @previous_edits.empty?
+
+    # In case people happen upon our diff summary,
+    # make it clear that this is not an article.
+    fout << "{{User page}}\n"
+
+    reconnect(INSECURE_API_URL,http_in) do |http|
+      @previous_edits.each_pair do |title, entry|
+        entry.summarize(http,fout)
+      end
+    end
+
+    fout
+  end
+end
+
 
