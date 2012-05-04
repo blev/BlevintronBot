@@ -311,8 +311,7 @@ private
       end
     end
 
-    # Determine number of contributions this user has
-    # made over the last N months.
+    # Is the user inactive?
     if USER_INACTIVITY_THRESHOLD
       last_contrib = retrieve_contributions user, 1, @connection
       if last_contrib.empty? or
