@@ -133,7 +133,7 @@ class Editor
 
     # In case people happen upon our diff summary,
     # make it clear that this is not an article.
-    fout << "{{User page}}\n"
+    fout << "__NOINDEX__\n{{User page}}\n"
 
     reconnect(INSECURE_API_URL,http_in) do |http|
       @previous_edits.each_pair do |title, entry|
