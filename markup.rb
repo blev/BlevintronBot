@@ -249,6 +249,30 @@ def if_followed_by_template body, pattern, offset
   false
 end
 
+def if_followed_by_link body, pattern, offset
+  # Search forward for [
+  start = body.index '[', offset+pattern.size
+  return false if start==nil
+
+  stop = body.index ']', start
+  return false if stop==nil
+
+  # Nothing but spaces separate pattern and the start?
+  spaces = body[ (offset+pattern.size) ... start]
+  return false unless spaces.strip == ''
+
+  # Look at the link
+  # External links only; reject wiki links
+  return false if body[start,2] == '[['
+  return false if body[stop-1,2] == ']]'
+
+  innards = body[start+1 .. stop-1]
+  link,sep,title = innards.partition(/\s+/m)
+
+  yield [link,title]
+  return true
+end
+
 def if_within_ref body, pattern, offset
   # Find the corresponding </ref>
   last = body.index(/<\s*\/\s*ref\s*>/i, offset + pattern.size)
@@ -402,18 +426,26 @@ def this_use_dead_or_archived? body,url,idx
     # Marked dead by {{dead link}} following
     return true if tag.is_dead?
     return true if tag.is_archive?
+
+  end or if_followed_by_link(body,url,idx) do |url,title|
+    if looks_like_archive? url
+      return true
+    end
   end
 
-  # TODO followed by [http://archive.org mirror]
 
   if_within_brackets(body, url, idx) do |first,last|
     bracket_link = body[ first .. last ]
     if_followed_by_template(body, bracket_link, first) do |tag|
       return true if tag.is_dead?
       return true if tag.is_archive?
+
+    end or if_followed_by_link(body, bracket_link, first) do |url,title|
+      if looks_like_archive? url
+        return true
+      end
     end
 
-    # TODO followed by [http://archive.org mirror]
   end
 
   if_within_template(body, url, idx) do |tag|
@@ -428,9 +460,12 @@ def this_use_dead_or_archived? body,url,idx
       if_followed_by_template(body, tag.source, tag.start_offset) do |tag|
         return true if tag.is_dead?
         return true if tag.is_archive?
-      end
 
-      # TODO followed by [http://archive.org mirror]
+      end or if_followed_by_link(body, tag.source, tag.start_offset) do |url,title|
+        if looks_like_archive? url
+          return true
+        end
+      end
     end
   end
 
@@ -483,5 +518,15 @@ def wiki_redirect? page
   end
   nil
 end
+
+def looks_like_archive? url
+  begin
+    u = URI.parse url
+    return ['web.archive.org', 'webcitation.org', 'www.webcitation.org'].include?(u.host.downcase)
+  rescue Exception => e
+    return false
+  end
+end
+
 
 
