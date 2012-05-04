@@ -1,5 +1,17 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
+API:
+  Detect if authenticated session has expired
+  If so, re-authenticate and retry
+
+send_message_to:
+  - follow redirects in User Talk pages.
+
+only send notifications if the links were not fixed after a week.
+  ? maybe interesting
+  ? is it worth the trouble?
+    - If I do this, I'll cut experiment stats.
+
 TESTING ------------------------------------------------------------------
 
 Make it easier to review:
@@ -19,10 +31,6 @@ $cancel vs retry?
 $cancel vs http timeout?
   - much of this boils down to how the implementors of ruby's
     Net::HTTP chose to handle interrupts.
-
-API:
-  Detect if authenticated session has expired
-  If so, re-authenticate and retry
 
 In terms of searching for archive copies, sending notifications:
   http://www.example.com and http://www.example.com/ should be
@@ -44,10 +52,6 @@ migrate to ruby 1.9 ?
 cantor set 500+content
   - take an in-depth look at all known 500s, to see if there
     are any simple heuristics to distinguish these cases.
-
-only send notifications if the links were not fixed after a week.
-  ? maybe interesting
-  ? is it worth the trouble?
 
 webcitation query urls => permalinks
 
