@@ -101,7 +101,7 @@ end
 # Remove category membership tags from a string.
 def strip_categories str
   str.strip!
-  str.gsub!(/\[\[Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
+  str.gsub!(/\[\[\s*Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
 end
 
 # Return the length of the common prefix
