@@ -84,7 +84,7 @@ def compute_diffs(original, modified, fout='')
 
     # We don't want to accidentally add our diff document
     # to an article category.
-    fout << strip_categories(ctx)
+    fout << userify( ctx.strip )
 
     if ctx.start_with? "\n|-" and not ctx.include? "|}"
       # Wrap wiki-tables so they render correctly.
@@ -102,6 +102,16 @@ end
 def strip_categories str
   str.strip!
   str.gsub!(/\[\[\s*Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
+end
+
+LANG_REGEX = "(" + (ALL_LANGUAGE_CODES.map {|code| "#{code}:"}.join "|") + ")"
+
+def strip_interlanguage str
+  str.gsub!(/\[\[(#{LANG_REGEX}.*?)\]\]/mi, '[[:\1]]')
+end
+
+def userify str
+  strip_interlanguage( strip_categories str )
 end
 
 # Return the length of the common prefix
