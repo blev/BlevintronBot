@@ -386,7 +386,7 @@ class Link
 
     custom_headers = {
       'User-Agent' => PUBLIC_USER_AGENT,
-      'Referer'    => (article2uri @users.first)
+      'Referer'    => article2uri(@users.first || 'Hello world program')
     }
 
     code, location, cookie = retrieve_head uri, http, custom_headers, :silent
