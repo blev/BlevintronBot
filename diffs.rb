@@ -98,22 +98,6 @@ def compute_diffs(original, modified, fout='')
   fout
 end
 
-# Remove category membership tags from a string.
-def strip_categories str
-  str.strip!
-  str.gsub!(/\[\[\s*Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
-end
-
-LANG_REGEX = "(" + (ALL_LANGUAGE_CODES.map {|code| "#{code}:"}.join "|") + ")"
-
-def strip_interlanguage str
-  str.gsub!(/\[\[(#{LANG_REGEX}.*?)\]\]/mi, '[[:\1]]')
-end
-
-def userify str
-  strip_interlanguage( strip_categories str )
-end
-
 # Return the length of the common prefix
 def find_common_prefix(s1, s2)
   shorter = [s1.size, s2.size].min
