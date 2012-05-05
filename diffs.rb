@@ -122,7 +122,7 @@ end
 
 
 class Editor
-  def summarize_recent_edits(fout='', http_in=nil)
+  def summarize_recent_edits(newer_than_revid=0, fout='', http_in=nil)
     return fout if @previous_edits.empty?
 
     # In case people happen upon our diff summary,
@@ -132,7 +132,9 @@ class Editor
     reconnect(INSECURE_API_URL,http_in) do |http|
       @previous_edits.each_pair do |title, entries|
         entries.each do |entry|
-          entry.summarize(http,fout)
+          if entry.new_revision_id > newer_than_revid
+            entry.summarize(http,fout)
+          end
         end
       end
     end
