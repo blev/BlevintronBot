@@ -6,6 +6,10 @@ API:
 
 send_message_to:
   - follow redirects in User Talk pages.
+  - carefully account for notification period
+    e.g. user MainAccount has a legitimate laternative account SecondAccount,
+    and User_talk:SecondAccount is a redirect to MainAccount,
+    then edit rate respects both accounts.
 
 only send notifications if the links were not fixed after a week.
   ? maybe interesting
