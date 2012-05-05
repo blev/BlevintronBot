@@ -223,7 +223,7 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
         begin
           req = Net::HTTP::Get.new uri.request_uri
           req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host
+          req['Host'] = uri.host.downcase
           req['Accept-Encoding'] = 'gzip, identity'
           req['Connection'] = 'Keep-Alive'
 
@@ -311,7 +311,7 @@ def retrieve_post(uri, args, http_in=nil, extra_headers={})
         begin
           req = Net::HTTP::Post.new uri.request_uri
           req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host
+          req['Host'] = uri.host.downcase
           req['Accept-Encoding'] = 'gzip, identity'
           req['Connection'] = 'Keep-Alive'
 
@@ -466,7 +466,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
 
         req = Net::HTTP::Head.new uri.request_uri
         req['User-Agent'] = HONEST_USER_AGENT
-        req['Host'] = uri.host
+        req['Host'] = uri.host.downcase
         req['Connection'] = 'Keep-Alive'
 
         extra_headers.each do |k,v|
@@ -517,7 +517,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
           # Try again with HTTP GET
           req = Net::HTTP::Get.new uri.request_uri
           req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host
+          req['Host'] = uri.host.downcase
           req['Connection'] = 'Keep-Alive'
           req['Accept-Encoding'] = 'gzip, identity'
 
