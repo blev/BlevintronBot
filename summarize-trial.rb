@@ -47,7 +47,7 @@ puts "Uploading summary to '#{article}'"
 
 Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
   result,id = session.replace(
-    "User:#{OPERATOR_USERNAME}/MostRecentTrial",
+    article,
     nil,
     "Summary of most recent trial",
     summaries)
