@@ -130,8 +130,10 @@ class Editor
     fout << "__NOINDEX__\n{{User page}}\n"
 
     reconnect(INSECURE_API_URL,http_in) do |http|
-      @previous_edits.each_pair do |title, entry|
-        entry.summarize(http,fout)
+      @previous_edits.each_pair do |title, entries|
+        entries.each do |entry|
+          entry.summarize(http,fout)
+        end
       end
     end
 

@@ -530,14 +530,13 @@ end
 
 # Remove category membership tags from a string.
 def strip_categories str
-  str.strip!
-  str.gsub!(/\[\[\s*Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
+  str.gsub(/\[\[\s*Category:(.*?)(\|.*?)?\]\]/mi, '[[:Category:\1]]')
 end
 
 LANG_REGEX = "(" + (ALL_LANGUAGE_CODES.map {|code| "#{code}:"}.join "|") + ")"
 
 def strip_interlanguage str
-  str.gsub!(/\[\[(#{LANG_REGEX}.*?)\]\]/mi, '[[:\1]]')
+  str.gsub(/\[\[(#{LANG_REGEX}.*?)\]\]/mi, '[[:\1]]')
 end
 
 # Remove sensitive tags from article text so that it can be

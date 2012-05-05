@@ -19,9 +19,6 @@ File.atomic_create('summaries.out') do |fout|
   fout.puts summaries
 end
 
-# TODO post this document to wikipedia somewhere.
-exit
-
 Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
   puts "Uploading summary..."
   result,id = session.replace(
@@ -32,3 +29,4 @@ Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
 
   puts "Result: #{result}"
 end
+
