@@ -127,7 +127,7 @@ MAX_EDITS_PER_DAY = nil
 # If we are in a trial period, they might specify
 # a maximum number of edits.  Normally, this should be nil,
 # meaning no limit
-TRIAL_MAX_EDITS = 276 + 250
+TRIAL_MAX_EDITS = 526 + 250
 
 # if we are in a trial period, they might specify
 # a maximum number of notifications.  Normally, this should
