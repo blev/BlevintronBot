@@ -275,21 +275,12 @@ private
     end
 
     if SAVE_EDITS_TO_USERSPACE
-      mocks,old_rev = retrieve_article MOCK_EDIT_ARTICLE
-      if mocks == nil or mocks.strip == ''
-        mocks = "__NOINDEX__\n{{User page}}\n"
-      end
-
-      if mocks.size < MOCK_EDIT_SIZE_LIMIT
+      if MOCK_EDIT_SIZE_LIMIT > (retrieve_article_size MOCK_EDIT_ARTICLE)
         diffs = compute_diffs(old_body,new_body)
         if diffs.size > 0
-          mocks << "\n==#{name}==\n"
-          mocks << diffs
           Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
             $log.puts "Submitting mock-edit to wikipedia..."
-            result, revid = session.replace(
-              MOCK_EDIT_ARTICLE,old_rev,
-              "Mock edit #{name}", mocks)
+            result, revid = session.append_section(MOCK_EDIT_ARTICLE, name, diffs)
             $log.puts "--> #{result}"
           end
         end
