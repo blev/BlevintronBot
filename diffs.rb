@@ -8,6 +8,7 @@
 
 require 'markup'
 
+
 # Compare two wikitext document.
 # Generate a diff that is a valid wikitext document.
 def compute_diffs(original, modified, fout='')
@@ -40,23 +41,29 @@ def compute_diffs(original, modified, fout='')
   # Widen each change into a context
   contexts = []
   diff_occurrences.each do |offset,pattern|
-    # By preference,
-    #   - A <ref>...</ref> tag.
-    #   - A template
-    #   - A table row
-    #   - The line itself.
-    if_within_ref modified, pattern, offset do |first,close|
-      contexts << [ first, close ]
-
-    end or if_within_template modified, pattern, offset do |template|
-      contexts << [ template.start_offset, template.end_offset+1 ]
-
-    end or if_within_table_row modified, pattern, offset do |first,close|
-      contexts << [ first, close ]
+    if_expand_context modified,pattern,offset do |first,close|
+      contexts << [first,close]
 
     end or begin
       begin_line = (modified.rindex("\n", offset) || -1)+1
       end_line = modified.index("\n", offset+pattern.size) || (modified.size-1)
+
+      # There might be a context which includes begin_line,
+      # but which does not intersect the difference within this line.
+      if_expand_context modified, "\n", begin_line do |first,close|
+        if close < offset
+          begin_line = [offset, close+1].min
+        end
+      end
+
+      # There might be a context which includes end_line,
+      # but which does not intersect the difference within this line
+      if_expand_context modified, "\n", end_line do |first,close|
+        if offset+pattern.size <= first
+          end_line = [offset+pattern.size-1, first-1].max
+        end
+      end
+
       contexts << [ begin_line, end_line ]
     end
   end
@@ -96,6 +103,33 @@ def compute_diffs(original, modified, fout='')
 
   fout << "<references/>\n"
   fout
+end
+
+# Given a region of the string which has changed,
+# maybe yield a larger range of structured wikitext
+# which contains that region.
+def if_expand_context modified,pattern,offset
+  # By preference,
+  #   - A <ref>...</ref> tag.
+  #   - A template
+  #   - A table row
+  #   - The line itself.
+  if_within_ref modified, pattern, offset do |first,close|
+    yield [ first, close ]
+    return true
+  end
+
+  if_within_template modified, pattern, offset do |template|
+    yield [ template.start_offset, template.end_offset+1 ]
+    return true
+  end
+
+  if_within_table_row modified, pattern, offset do |first,close|
+    yield [ first, close ]
+    return true
+  end
+
+  false
 end
 
 # Return the length of the common prefix
