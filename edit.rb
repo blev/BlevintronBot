@@ -283,7 +283,7 @@ private
       if mocks.size < MOCK_EDIT_SIZE_LIMIT
         diffs = compute_diffs(old_body,new_body)
         if diffs.size > 0
-          mocks << "==#{name}==\n"
+          mocks << "\n==#{name}==\n"
           mocks << diffs
           Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
             $log.puts "Submitting mock-edit to wikipedia..."
