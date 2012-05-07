@@ -180,6 +180,11 @@ class Link
     @attempts.last.date
   end
 
+  def first_check_time
+    return nil if is_new?
+    @attempts.first.date
+  end
+
   # A link can be classified in one of these cases
   #   
   #   is_young? - the link has not been tested enough.

@@ -33,20 +33,8 @@ class Editor
       return
     end
 
-    article_set = (LIMIT_EDIT_ARTICLES || @bad.keys)
-    ready_articles = article_set.select {|art| article_ready? art}
-    if ready_articles.empty?
-      $log.puts "Nothing to edit."
-      wait
-      return
-    end
-
-    $log.puts "Selecting an article to edit..."
-
-    article = ready_articles[ rand( ready_articles.size ) ]
-    if article_ready? article
-      edit_one_article! article
-    end
+    best_article = select_article_to_edit
+    edit_one_article! best_article
 
     manage_bad_links
   end
@@ -221,6 +209,45 @@ class Editor
   end
 
 private
+
+  def select_article_to_edit
+    article_set = (LIMIT_EDIT_ARTICLES || @bad.keys)
+    ready_articles = article_set.select {|art| article_ready? art}
+    if ready_articles.empty?
+      $log.puts "Nothing to edit."
+      wait
+      return
+    end
+
+    $log.puts "Selecting an article to edit..."
+
+    # Tournament selection: choose best among a random group
+    best_article = nil
+    best_score = 0
+    5.times do
+      article = ready_articles[ rand( ready_articles.size ) ]
+      score = article_edit_priority article
+      if score > best_score
+        best_article = article
+        best_score   = score
+      end
+    end
+    best_article
+  end
+
+  # Give priority to some articles.
+  # Bigger is better.
+  def article_edit_priority art
+    base = Time.now
+    sum = 0
+    @bad[art].each do |link|
+      # Favor articles with more broken
+      # links, and which have been sitting
+      # in @bad longer.
+      sum += base - link.first_check_time
+    end
+    sum
+  end
 
   def commit_edits! this_edit, new_body,letters, remaining_links
 
