@@ -150,6 +150,45 @@ class Session
     not logged_in?
   end
 
+  # Adds a new section to the tail of the given page.
+  # Returns:
+  #   ['Success', newRevisionIdInteger] on success
+  #   ['Message', extra] on failure
+  def append_section(article, sectionTitle, newText)
+    return ['Failure', 'cannot login'] unless login
+
+    begin
+      md5 = MD5.new
+      md5 << newText
+
+      args = {
+        'action' => 'edit',
+        'title' => article,
+        'section' => 'new',
+        'sectiontitle' => sectionTitle,
+        'text' => newText,
+        'summary' => "BOT: #{ sectionTitle }",
+        'bot' => 'true',
+        'md5' => md5.hexdigest,
+        'assert' => 'user',
+        'token' => editToken
+      }
+
+      api_request SECURE_API_URL,args,@connection, {'Cookie'=>cookie} do |xml|
+        xml.elements.each('/api/edit') do |elt|
+          if elt.attribute('result').to_s == 'Success'
+            return ['Success', elt.attribute('newrevid').to_s.to_i]
+          end
+        end
+      end
+
+    rescue Exception => e
+      return ['exception', e]
+    end
+
+    return ['failure other', nil]
+  end
+
 private
   def stale?
     return false unless @login_time
@@ -251,45 +290,6 @@ private
     end
 
     return ['failure', nil]
-  end
-
-  # Adds a new section to the tail of the given page.
-  # Returns:
-  #   ['Success', newRevisionIdInteger] on success
-  #   ['Message', extra] on failure
-  def append_section(article, sectionTitle, newText)
-    return ['Failure', 'cannot login'] unless login
-
-    begin
-      md5 = MD5.new
-      md5 << newText
-
-      args = {
-        'action' => 'edit',
-        'title' => article,
-        'section' => 'new',
-        'sectiontitle' => sectionTitle,
-        'text' => newText,
-        'summary' => "BOT: #{ sectionTitle }",
-        'bot' => 'true',
-        'md5' => md5.hexdigest,
-        'assert' => 'user',
-        'token' => editToken
-      }
-
-      api_request SECURE_API_URL,args,@connection, {'Cookie'=>cookie} do |xml|
-        xml.elements.each('/api/edit') do |elt|
-          if elt.attribute('result').to_s == 'Success'
-            return ['Success', elt.attribute('newrevid').to_s.to_i]
-          end
-        end
-      end
-
-    rescue Exception => e
-      return ['exception', e]
-    end
-
-    return ['failure other', nil]
   end
 
   def filter_message user
