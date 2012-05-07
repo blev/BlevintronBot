@@ -203,7 +203,7 @@ class Editor
     $log.puts
 
     # Save the changes to wikipedia
-    commit_edits! this_edit, new_body, letters, remaining_links
+    commit_edits! this_edit, body, new_body, letters, remaining_links
 
     nil
   end
@@ -249,7 +249,9 @@ private
     sum
   end
 
-  def commit_edits! this_edit, new_body,letters, remaining_links
+  def commit_edits! this_edit,old_body,new_body,letters, remaining_links
+
+    name    = this_edit.title
 
     # Throttle the edit rate
     sleep_or_cancel(next_edit_time - Time.now)
@@ -263,11 +265,35 @@ private
     @lastEdit = start_time
     @editTimes << start_time
 
+    return if $cancel
+
     unless ENABLE_EDITS_TO_LIVE_SITE
       $log.puts
       $log.puts "Edits to live site disabled."
       $log.puts
       return
+    end
+
+    if SAVE_EDITS_TO_USERSPACE
+      mocks,old_rev = retrieve_article MOCK_EDIT_ARTICLE
+      if mocks == nil or mocks.strip == ''
+        mocks = "__NOINDEX__\n{{User page}}\n"
+      end
+
+      if mocks.size < MOCK_EDIT_SIZE_LIMIT
+        diffs = compute_diffs(old_body,new_body)
+        if diffs.size > 0
+          mocks << "==#{name}==\n"
+          mocks << diffs
+          Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
+            $log.puts "Submitting mock-edit to wikipedia..."
+            result, revid = session.replace(
+              MOCK_EDIT_ARTICLE,old_rev,
+              "Mock edit #{name}", mocks)
+            $log.puts "--> #{result}"
+          end
+        end
+      end
     end
 
     if TRIAL_MAX_EDITS
@@ -288,10 +314,6 @@ private
       end
     end
 
-    return if $cancel
-
-
-    name    = this_edit.title
     old_rev = this_edit.old_rev_time
     message = this_edit.message
     expcase = this_edit.experiment_case

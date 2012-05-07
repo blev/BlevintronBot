@@ -26,6 +26,8 @@ EDITOR_PID_FILE = "#{DB_DIR}/pid.editor"
 # for everyone except the original author
 # of the bot.
 SAVE_EDITS_LOCALLY = true
+# Should I save mock-edits to userspace?
+SAVE_EDITS_TO_USERSPACE = true
 
 # If so, save them to this directory.
 EDITS_DIR = "#{DB_DIR}/edits/"

@@ -84,7 +84,7 @@ def compute_diffs(original, modified, fout='')
 
     # We don't want to accidentally add our diff document
     # to an article category.
-    fout << userify( ctx.strip )
+    fout << demote_subsections( userify( ctx.strip ) )
 
     if ctx.start_with? "\n|-" and not ctx.include? "|}"
       # Wrap wiki-tables so they render correctly.

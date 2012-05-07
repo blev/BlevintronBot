@@ -546,3 +546,9 @@ def userify str
   strip_interlanguage( strip_categories str )
 end
 
+
+# Change 1st-level headings to 2nd-level subheadings
+def demote_subsections str
+  str.gsub(/^(==[^=].*?==)$/, '=\1=')
+end
+

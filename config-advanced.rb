@@ -90,15 +90,15 @@ HIGH_TRAFFIC_END=4 # UTC
 # and then download all of those pages.  We call this a 'scrape
 # group'.  To be nice, we throttle our scrape groups.
 # - at most one scrape group / N seconds during low traffic
-LOW_TRAFFIC_SCRAPE_PERIOD = 10.seconds
+LOW_TRAFFIC_SCRAPE_PERIOD = 5.seconds
 # - at most one scrape group / N seconds during high traffic
-HIGH_TRAFFIC_SCRAPE_PERIOD = 20.seconds
+HIGH_TRAFFIC_SCRAPE_PERIOD = 10.seconds
 
 # How quickly is this bot allowed to make edits?
 # - at most 1 edit / N seconds during low traffic
-LOW_TRAFFIC_EDIT_PERIOD = 15.seconds
+LOW_TRAFFIC_EDIT_PERIOD = 10.seconds
 # - at most 1 edit / N seconds during high traffic
-HIGH_TRAFFIC_EDIT_PERIOD = 30.seconds
+HIGH_TRAFFIC_EDIT_PERIOD = 20.seconds
 
 # Maximum number of distinct links to correct
 # in a single edit to a single article.
@@ -196,6 +196,13 @@ NUM_FRAGMENTS = 6
 # edit rate.  If you over-estimate, you increase your
 # risk of an edit conflict.
 ESTIMATED_EDIT_PREPARE_LATENCY = 30.seconds
+
+
+# If SAVE_EDITS_TO_USERSPACE,
+# Save mock-edits to this article
+MOCK_EDIT_ARTICLE = "User:#{OPERATOR_USERNAME}/MockEdits"
+# Stop saving if that article exceeds this size
+MOCK_EDIT_SIZE_LIMIT = 10*1024
 
 # --------------- Replacing links with archive copies
 
