@@ -716,4 +716,31 @@ def captcha uri, xml, http_in
   return [nil,nil]
 end
 
+# Determine the size (bytes) of the latest revision of this article
+def retrieve_article_size article, http_in=nil
+  begin
+    args = {
+      "action"    => "query",
+      "prop"      => "revisions",
+      "titles"    => article,
+      "rvprop"    => "size",
+      "rvlimit"   => 1,
+      "rvdir"     => "older"
+    }
+
+    api_request INSECURE_API_URL,args,http_in do |xml|
+      result = []
+      xml.elements.each('/api/query/pages/page/revisions/rev') do |rev|
+        size = rev.attribute('size').to_s.to_i
+        $log.puts "Article '#{article}' size #{size} bytes"
+        return size
+      end
+    end
+
+  rescue Exception => e
+    $log.puts "- exception in retrieve_article_size: #{e} #{e.backtrace}"
+  end
+
+  -1
+end
 
