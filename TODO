@@ -1,8 +1,11 @@
 BLOCKING FEATURES / BUGS -------------------------------------------------
 
-API:
-  Detect if authenticated session has expired
-  If so, re-authenticate and retry
+URL extractions.
+  - Wikipedia is liberal in characters it allows in URLs; browsers are too
+  - Ruby's URI::extract is very conservative, follows RFCs 1738, 3986
+  - To lower my error rate, I will need to replace URI::extract with a
+    more liberal parser.
+  - This may merit a proper parser.
 
 send_message_to:
   - follow redirects in User Talk pages.
@@ -11,23 +14,18 @@ send_message_to:
     and User_talk:SecondAccount is a redirect to MainAccount,
     then edit rate respects both accounts.
 
+API:
+  Detect if authenticated session has expired
+  If so, re-authenticate and retry
+
 only send notifications if the links were not fixed after a week.
   ? maybe interesting
   ? is it worth the trouble?
     - If I do this, I'll cut experiment stats.
+    - If I do this, it will be difficult to properly account for
+      timeouts between notifications to a user correctly.
 
 TESTING ------------------------------------------------------------------
-
-Make it easier to review:
-  collect all diffs, and a context relative-to wikitext structure,
-  and put it all onto some page.
-  - generate context-relative diffs: DONE
-  - summarize an item from @previous_edits: DONE
-  - collect diffs for all items in @previous_edits: DONE
-  - write driver script to collect those diffs: DONE
-  - post diffs to some user page: DONE, though disabled for now
-  - Explicitly mark it NOINDEX and {{User page}}: DONE
-  - Force-remove category membership: DONE
 
 TABLED -------------------------------------------------------------------
 
@@ -814,5 +812,16 @@ adding [http://archive/foo/bar mirror] after the dead link/{{Cite}}/etc.
   - generalize: look if the link/cite/whatever is followed by a link to
     web.archive.org/web/* or webcitation.org/*
   DONE
+
+Make it easier to review:
+  collect all diffs, and a context relative-to wikitext structure,
+  and put it all onto some page.
+  - generate context-relative diffs: DONE
+  - summarize an item from @previous_edits: DONE
+  - collect diffs for all items in @previous_edits: DONE
+  - write driver script to collect those diffs: DONE
+  - post diffs to some user page: DONE, though disabled for now
+  - Explicitly mark it NOINDEX and {{User page}}: DONE
+  - Force-remove category membership: DONE
 
 
