@@ -134,7 +134,7 @@ def try_parse_date ad
 end
 
 
-NOPARSE_TAGS = ['nowiki', 'pre']
+NOPARSE_TAGS = ['nowiki', 'pre', 'source']
 
 def remove_unparsed! string
   # First, remove comments
