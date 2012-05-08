@@ -7,9 +7,6 @@
 
 ## Description: utility to convert the database (all or part) to .yaml format
 
-require 'net/http'
-require 'uri'
-
 require 'db'
 
 input_dir = DB_DIR

@@ -6,7 +6,7 @@
 ## Description:  utility methods
 
 require 'pp'
-require 'uri'
+require 'liberal_uri'
 
 class File
 

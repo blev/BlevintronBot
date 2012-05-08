@@ -9,7 +9,7 @@
 
 require 'net/http'
 require 'net/https'
-require 'uri'
+require 'liberal_uri'
 
 require 'config'
 
@@ -171,7 +171,7 @@ class Link
   end
 
   def host
-    u = URI.parse @url
+    u = URI.liberal_parse @url
     u.host
   end
 
@@ -250,8 +250,8 @@ class Link
     return false unless @code == '301'
     return false if @attempts.last.cookie
 
-    src = URI.parse url
-    dst = URI.parse redirect
+    src = URI.liberal_parse url
+    dst = URI.liberal_parse redirect
 
     spath = src.request_uri
     dpath = dst.request_uri
@@ -319,7 +319,7 @@ class Link
     # Sometimes a redirect is a path
     if redir.start_with? '/'
       # In that case, it inherits (scheme, host, port) from previous url.
-      u = URI.parse @url
+      u = URI.liberal_parse @url
 
       if u.port == Net::HTTP.default_port
         redir = "#{ u.scheme }://#{ u.host }#{ redir }"
@@ -330,7 +330,7 @@ class Link
 
     # Sanity check: try to parse the result
     # and convert it back to a string
-    u = URI.parse redir
+    u = URI.liberal_parse redir
     u.to_s
   end
 
@@ -384,7 +384,7 @@ class Link
       return
     end
 
-    uri = URI.parse @url
+    uri = URI.liberal_parse @url
     $log.print "  "
     $log.print "(#{@attempts.size+1}) " unless @attempts.empty?
     $log.print "#{uri.request_uri} ... "

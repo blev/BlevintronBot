@@ -107,7 +107,7 @@ class Editor
 
     # Lookup article history to determine when each link
     # was added to the article.
-    broken_uris  = contributing_bad_links.map {|link| URI.parse link.url}
+    broken_uris  = contributing_bad_links.map {|link| URI.liberal_parse link.url}
     introductions = search_history name, broken_uris
     # some error while retrieving history.
     return nil if introductions.empty?
@@ -474,7 +474,7 @@ private
   def archive_tag(date,url)
 
     # The two templates /really/ require different date formats :(
-    u = URI.parse url
+    u = URI.liberal_parse url
     if u.host == 'web.archive.org'
       # http://en.wikipedia.org/wiki/Template:Wayback
       t = Template.new 'Wayback'

@@ -230,7 +230,7 @@ TMUX_COLUMN_WRAP = 85
 # A shutdown page.
 # If this page matches /shutdown/i
 # then the bot will stop.
-SHUTDOWN_URL = URI.parse "http://#{WIKI_LANGUAGE_CODE}.wikipedia.org/wiki/User:#{BOT_USERNAME}/Bot/Shutdown?action=raw"
+SHUTDOWN_URL = URI.liberal_parse "http://#{WIKI_LANGUAGE_CODE}.wikipedia.org/wiki/User:#{BOT_USERNAME}/Bot/Shutdown?action=raw"
 
 # --------------- Report status
 

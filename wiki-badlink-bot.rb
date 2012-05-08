@@ -6,9 +6,6 @@
 
 ## Description: main driver program
 
-require 'net/http'
-require 'uri'
-
 require 'db'
 require 'tmux'
 require 'object_queue'

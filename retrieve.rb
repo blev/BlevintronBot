@@ -16,7 +16,7 @@
 
 require 'net/http'
 require 'net/https'
-require 'uri'
+require 'liberal_uri'
 require 'rexml/document'
 require 'stringio'
 require 'zlib'
@@ -111,7 +111,7 @@ def article2raw article
   uristr = article2uri(article) + "?action=raw"
 
   begin
-    return URI.parse uristr
+    return URI.liberal_parse uristr
   rescue Exception => e
     $log.puts "Bad Article '#{article}': #{e}"
   end
@@ -143,7 +143,7 @@ def retrieve_revision(article, revid, http_in=nil)
   uri = nil
 
   begin
-    uri = URI.parse uristr
+    uri = URI.liberal_parse uristr
   rescue Exception => e
     $log.puts "Bad Article '#{article}' revision #{revid}: #{e}"
     return [nil,nil]
@@ -669,7 +669,7 @@ def captcha uri, xml, http_in
     return [nil,nil] unless path
 
     path = REXML::Text.unnormalize path.to_s
-    imguri = URI.parse(uri.scheme + '://' + uri.host + ':' + uri.port.to_s + path)
+    imguri = URI.liberal_parse(uri.scheme + '://' + uri.host + ':' + uri.port.to_s + path)
 
     image,date = retrieve_page imguri, http_in
     return [nil,nil] unless image

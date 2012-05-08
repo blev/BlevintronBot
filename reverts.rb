@@ -6,7 +6,7 @@
 ## Description: collect statistics about our actions and how the
 ## Description: the wikipedia community has responded.  Reverts? Fixes? etc.
 
-require 'uri'
+require 'liberal_uri'
 require 'net/http'
 require 'rexml/document'
 

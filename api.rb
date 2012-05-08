@@ -4,7 +4,7 @@
 
 ## Description: secure, authenticated editing sessions.
 
-require 'uri'
+require 'liberal_uri'
 require 'net/http'
 require 'net/https'
 require 'rexml/document'

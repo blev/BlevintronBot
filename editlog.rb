@@ -5,7 +5,7 @@
 
 ## Description: maintain a record of which edits I have done in the past.
 
-require 'uri'
+require 'liberal_uri'
 require 'net/http'
 require 'rexml/document'
 

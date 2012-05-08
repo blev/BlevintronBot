@@ -4,7 +4,7 @@
 
 ## Description: Code to search archive.org for a replacement link.
 
-require 'uri'
+require 'liberal_uri'
 require 'config'
 require 'retrieve'
 
@@ -15,7 +15,7 @@ ARCHIVE_HIT_PREFIX = "http://web.archive.org/web/"
 WEBCITE_PREFIX = "http://webcitation.org"
 
 def search_webcitation_org(oldurl, date_in, http_in=nil)
-  search = URI.parse "#{WEBCITE_PREFIX}/query.php"
+  search = URI.liberal_parse "#{WEBCITE_PREFIX}/query.php"
   args = {
     'url' => oldurl,
     'date' => (date_in.getutc.strftime "%Y-%m-%D %h:%m:%s"),
@@ -26,7 +26,7 @@ def search_webcitation_org(oldurl, date_in, http_in=nil)
   return [] if code != '200'
   return [] if cookie == nil
 
-  top = URI.parse "#{WEBCITE_PREFIX}/topframe.php"
+  top = URI.liberal_parse "#{WEBCITE_PREFIX}/topframe.php"
   body,xdate = retrieve_page top, http_in, {'Cookie'=>cookie}
   return [] if body == nil
 
@@ -54,7 +54,7 @@ end
 # Turn the query result into a permalink.
 # Return nil on failure.
 def webcite_permalink(found_url, http_in)
-  uri = URI.parse found_url
+  uri = URI.liberal_parse found_url
   page,date,cookie = retrieve_page(uri, http_in)
   return nil unless page
 
@@ -62,7 +62,7 @@ def webcite_permalink(found_url, http_in)
 #  TODO
 #  return nil unless cookie
 #
-#  top = URI.parse "#{WEBCITE_PREFIX}/topframe.php"
+#  top = URI.liberal_parse "#{WEBCITE_PREFIX}/topframe.php"
 #  body,xdate = retrieve_page top, http_in, cookie
 #  return nil unless body
 #
@@ -75,14 +75,14 @@ def webcite_permalink(found_url, http_in)
 end
 
 def search_archive_org_by_year(oldurl, year, http_in)
-  search_year  = URI.parse(ARCHIVE_SEARCH_PREFIX + "#{year}*/" + oldurl)
+  search_year  = URI.liberal_parse(ARCHIVE_SEARCH_PREFIX + "#{year}*/" + oldurl)
 
   # Query archive.org
   body,xdate = retrieve_page search_year, http_in
   return [] unless body
 
   # Extract archive hits from this document
-  hits = URI.extract(body, ARCHIVE_HIT_SCHEMES)
+  hits = URI.liberal_extract(body, ARCHIVE_HIT_SCHEMES)
   hits.uniq!
   hits.delete_if {|u| not u.start_with? ARCHIVE_HIT_PREFIX }
   hits.delete_if {|u| not u.end_with? oldurl }
@@ -141,7 +141,7 @@ def find_archive_url(oldurl, date, search_archive_http_in=nil, confirm_archive_h
       case source
       when 'archive.org'
         # Issue a HEAD request to confirm that this link works.
-        found_uri = URI.parse found_url
+        found_uri = URI.liberal_parse found_url
         fbody,fdate = retrieve_page found_uri, confirm_archive_http_in
         if fbody
           return [ found_date, found_url ]
@@ -173,9 +173,9 @@ def find_archive_urls urls
   result = {}
 
   # Connect once
-  reconnect(URI.parse ARCHIVE_SEARCH_PREFIX) do |archive_search_http|
-    reconnect(URI.parse ARCHIVE_HIT_PREFIX) do |archive_confirm_http|
-      reconnect(URI.parse WEBCITE_PREFIX) do |webcite_http|
+  reconnect(URI.liberal_parse ARCHIVE_SEARCH_PREFIX) do |archive_search_http|
+    reconnect(URI.liberal_parse ARCHIVE_HIT_PREFIX) do |archive_confirm_http|
+      reconnect(URI.liberal_parse WEBCITE_PREFIX) do |webcite_http|
         # Search all URLs
         urls.each do |date,url|
           return result if $cancel

@@ -8,7 +8,7 @@
 # Extracting links, comprehension of {{cite...}, etc
 
 require 'nobots'
-require 'uri'
+require 'liberal_uri'
 require 'template'
 
 class String
@@ -309,7 +309,7 @@ end
 # Pull all distinct URLs from the body of an article,
 def extract_urls body
   # Look for URLs within this document.
-  urls = URI.extract(body, ['http', 'https'])
+  urls = URI.liberal_extract(body, ['http', 'https'])
   origSize = urls.size
 
   urls.uniq!
@@ -331,13 +331,39 @@ def scrape_article body
   urls
 end
 
+# KEEP THIS for regression testing purposes
+def old_extract_urls body
+  # Look for URLs within this document.
+  urls = URI.extract(body, ['http', 'https'])
+  origSize = urls.size
+
+  urls.uniq!
+  urls.delete_if {|u| pathological_url? u }
+  urls = urls.map {|u| remove_trailing_junk u }
+  urls.uniq!
+
+#  $log.puts " - Extracted #{urls.size}/#{origSize} URLs from this article"
+  urls
+end
+
+# KEEP THIS for regression testing purposes
+def old_scrape_article body
+  urls = old_extract_urls body
+
+  urls.delete_if {|uri| all_uses_dead_or_archived? body, uri }
+  $log.puts " - Scraped #{urls.size} URLs from this article"
+  urls
+end
+
+
+
 # Sometimes, Ruby's class URI shits itself.
 # Examples seen in the wild:
 #     http:/only.one/slash/after/scheme
 #     http://HTTP://did.you.expect.a.port.number/after/that/colon?
 def pathological_url? u
   begin
-    uri = URI.parse u
+    uri = URI.liberal_parse u
 
     return true if uri.scheme == nil
     return true if uri.host == nil
@@ -351,12 +377,12 @@ def pathological_url? u
   return false
 end
 
-# Correct the discrepancies between Ruby's URI.extract
+# Correct the discrepancies between Ruby's
 # and Wikipedia's link extraction algorithm.
 #
 # This function is mostly an ugly hack
 def remove_trailing_junk url
-  # Ruby's URI::extract follows the spec precisely, and
+  # Ruby follows the spec precisely, and
   # allows URIs which contain closing braces ] and commas.
   #
 
@@ -379,11 +405,11 @@ def remove_trailing_junk url
 
     # Ugly, context-sensitive cases
 
-    # This happens when Ruby's URI::extract sees
+    # This happens when Ruby sees
     # a bracket link
     next if url.chomp! ']'
 
-    #           document               =>    URI.extract              =>     corrected
+    #           document               =>    Ruby                     =>     corrected
     #   http://foo.com'''title'''      => http://foo.com'''title'''   => http://foo.com
     #    ''http://en.wikipedia.org/''  => http://en.wikipedia.org/''  => http://en.wikipedia.org
     #   '''http://en.wikipedia.org/''' => http://en.wikipedia.org/''' => http://en.wikipedia.org
@@ -521,7 +547,7 @@ end
 
 def looks_like_archive? url
   begin
-    u = URI.parse url
+    u = URI.liberal_parse url
     return ['web.archive.org', 'webcitation.org', 'www.webcitation.org'].include?(u.host.downcase)
   rescue Exception => e
     return false

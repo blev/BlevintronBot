@@ -6,6 +6,12 @@ URL extractions.
   - To lower my error rate, I will need to replace URI::extract with a
     more liberal parser.
   - This may merit a proper parser.
+  - According to [[Help:URL]]
+    - Start with 'http:' or 'https:'
+    - Take-while [^\s",';<>\[\]]
+    - Remove trailing junk
+    - Ensure that it parses correctly, somehow...
+  - Also need to replace URI::parse to allow this more liberal character set.
 
 send_message_to:
   - follow redirects in User Talk pages.

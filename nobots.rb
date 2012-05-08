@@ -78,7 +78,7 @@ def path_match(uri, pattern)
   if pattern.start_with? 'http://' or
      pattern.start_with? 'https://'
     begin
-      u = URI.parse pattern # may throw
+      u = URI.liberal_parse pattern # may throw
       return false if u.scheme != uri.scheme
       return false if u.host   != uri.host
       return false if u.port   != uri.port

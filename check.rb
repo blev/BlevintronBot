@@ -5,7 +5,7 @@
 
 ## Description: code for checking links.
 
-require 'uri'
+require 'liberal_uri'
 require 'net/https'
 
 require 'config'
@@ -37,8 +37,8 @@ class Scraper
     # Group them by by (scheme, host, port)
     ready.sort! do |link1, link2|
       begin
-        u1 = URI.parse link1.url
-        u2 = URI.parse link2.url
+        u1 = URI.liberal_parse link1.url
+        u2 = URI.liberal_parse link2.url
 
         "#{u1.scheme} #{u1.host.downcase} #{u1.port}" <=> "#{u2.scheme} #{u2.host.downcase} #{u2.port}"
 
@@ -102,7 +102,7 @@ private
       group_port = nil
 
     else
-      firstURI = URI.parse ready.first.url
+      firstURI = URI.liberal_parse ready.first.url
 
       group_scheme = firstURI.scheme
       group_host = firstURI.host.downcase
@@ -121,7 +121,7 @@ private
           raise(Exception.new 'malformed url')
         end
 
-        uri = URI.parse ready.first.url
+        uri = URI.liberal_parse ready.first.url
 
         break if uri.scheme != group_scheme
         break if uri.host.downcase != group_host
