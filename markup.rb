@@ -152,7 +152,7 @@ def remove_unparsed! string
   # Next, remove unparsed wikitext
   NOPARSE_TAGS.each do |tag|
     while true
-      first = string.index(/<\s*#{tag}\s*>/mi)
+      first = string.index(/<\s*#{tag}(\s+[^>]+)?\s*>/mi)
       break if first == nil
       last = string.index(/<\s*\/\s*#{tag}\s*>/mi, first)
       break if last == nil
