@@ -15,13 +15,26 @@ class String
     must_start_before = limits[:must_start_before]
     must_end_after    = limits[:must_end_after]
     must_start_after  = limits[:must_start_after]
+    redact_nested     = limits[:redact_nested]
 
     scratch = self.dup
 
     # First, remove all unparsed markup from scratch.
     remove_unparsed! scratch
 
+    prev_first = prev_last = nil
+
     while true
+      # Redact the template found during the previous iteration
+      # (important to do this here, so that 'next' and 'break'
+      # work correctly within the block).
+      if prev_first
+        len = prev_last - prev_first + 2
+        blanks = ' ' * len
+        scratch[ prev_first .. prev_last+1 ] = blanks
+        prev_first = prev_last = nil
+      end
+
       first = scratch.index '{{'
       break if first == nil
 
@@ -32,10 +45,11 @@ class String
       # But there might be '{{'
       first = scratch.rindex('{{', last)
 
-      # Remove this template from our scratch buffer
-      len = last - first + 2
-      blanks = ' ' * len
-      scratch[ first .. last+1 ] = blanks
+      # We remember these offsets so we can remove
+      # the template from the 'scratch' string
+      # after this iteration.
+      prev_first = first
+      prev_last = last
 
       next unless block_given?
       next if must_start_before and not (first <= must_start_before)
@@ -44,13 +58,27 @@ class String
 #      next if is_unparsed? self,blanks,first
 
       # Parse the template from the /original/ string
-      yield( Template.parse self,first,last )
+      if redact_nested
+        tem = Template.parse scratch, first, last, scratch
+      else
+        tem = Template.parse self, first, last, scratch
+      end
+
+      yield tem
+    end
+
+    # Redact template found during final iteration
+    if prev_first
+      len = prev_last - prev_first + 2
+      blanks = ' ' * len
+      scratch[ prev_first .. prev_last+1 ] = blanks
     end
 
     scratch
   end
 
   alias redact_all_templates each_template
+
 end
 
 
@@ -73,7 +101,7 @@ class Template
     @params = []
   end
 
-  def self.parse body, first, last
+  def self.parse body, first, last, body_with_nested_templates_redacted = nil
     str = body[ first .. last+1 ]
 
     return nil unless str.start_with? '{{'
@@ -81,7 +109,11 @@ class Template
 
     contents = str[2 .. -3]
 
-    contents_skeleton = contents.redact_all_templates
+    if body_with_nested_templates_redacted
+      contents_skeleton = body_with_nested_templates_redacted[ first+2 .. last-2 ]
+    else
+      contents_skeleton = contents.redact_all_templates
+    end
 
     # Tokenize.
     # Note that nested templates might have '|'
@@ -154,6 +186,12 @@ class Template
           yield [k.canon,nil]
         end
       end
+    end
+  end
+
+  def each_param_non_canon
+    @params.each do |k,v|
+      yield [k,v]
     end
   end
 
