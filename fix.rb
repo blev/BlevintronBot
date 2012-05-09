@@ -337,13 +337,11 @@ private
 
         first = idx
         last  = idx + oldurlstr.size - 1
-        link_title = nil
 
         # Don't place {{Dead link}} within a [bracket link]
         if_within_brackets body,oldurlstr,idx do |f,l|
           # put the {{Dead link}}, etc /after/ the bracket link.
           first,last = f,l
-          link_title = extract_bracket_link_title body[f..l]
         end
 
         # A few templates are fussy.
