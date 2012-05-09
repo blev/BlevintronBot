@@ -10,6 +10,7 @@
 require 'nobots'
 require 'liberal_uri'
 require 'template'
+require 'constants'
 
 class String
 
@@ -132,9 +133,6 @@ def try_parse_date ad
   $log.puts "Can't parse date string: #{ad}"
   nil
 end
-
-
-NOPARSE_TAGS = ['nowiki', 'pre', 'source', 'syntaxhighlight']
 
 def remove_unparsed! string
   # First, remove comments

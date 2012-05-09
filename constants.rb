@@ -51,3 +51,6 @@ ALL_LANGUAGE_CODES = [
   'uz','ve','vec','vi','vls','vo','war','wuu','xal','xmf','yi','yo','za',
   'zh','zh-classical','zh-min-nan','zh-yue','zu']
 
+
+NOPARSE_TAGS = ['nowiki', 'pre', 'source', 'syntaxhighlight']
+
