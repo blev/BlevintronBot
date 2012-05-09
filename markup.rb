@@ -337,7 +337,7 @@ def old_extract_urls body
 
   urls.uniq!
   urls.delete_if {|u| pathological_url? u }
-  urls = urls.map {|u| remove_trailing_junk u }
+  urls = urls.map {|u| old_remove_trailing_junk u }
   urls.uniq!
 
 #  $log.puts " - Extracted #{urls.size}/#{origSize} URLs from this article"
@@ -380,6 +380,53 @@ end
 #
 # This function is mostly an ugly hack
 def remove_trailing_junk url
+  # Ruby follows the spec precisely, and
+  # allows URIs which contain closing braces ] and commas.
+  #
+
+  # See [[Help_talk:URL##Can_someone_clarify_link_behavior_with_parenthesis.3F]]
+  # And MediaWiki source code for makeFreeExternalLink() at http://tinyurl.com/bpnj48w
+  # lines 1238--1243
+
+  while true
+    next if url.chomp! '.'
+    next if url.chomp! ','
+    next if url.chomp! '\\'
+    next if url.chomp! '!'
+    next if url.chomp! '?'
+    next if url.chomp! ';'
+    next if url.chomp! ':'
+
+    unless url.include? '('
+      next if url.chomp! ')'
+    end
+
+    #           document               =>    Ruby                     =>     corrected
+    #   http://foo.com'''title'''      => http://foo.com'''title'''   => http://foo.com
+    #    ''http://en.wikipedia.org/''  => http://en.wikipedia.org/''  => http://en.wikipedia.org
+    #   '''http://en.wikipedia.org/''' => http://en.wikipedia.org/''' => http://en.wikipedia.org
+    #
+    # We approximate this condition.  We will likely make fewer mistakes by
+    # assuming that URLs do not end with ''' or ''
+    if url =~ /^(.*?)'''.*$/
+      url = $1
+      next
+    end
+
+    if url =~ /^(.*?)''.*$/
+      url = $1
+      next
+    end
+
+    break
+  end
+
+  url
+end
+
+
+# KEEP THIS for regression testing purposes
+def old_remove_trailing_junk url
   # Ruby follows the spec precisely, and
   # allows URIs which contain closing braces ] and commas.
   #
@@ -506,17 +553,6 @@ def this_use_dead_or_archived? body,url,idx
   # No: when iterating via string.each_url_occurrence...
   return is_unparsed? body,url,idx
 end
-
-def extract_bracket_link_title str
-  if str =~ /^\[(.*?)\]$/
-    contents = $1.strip.split(/\s+/)
-    url = contents.shift
-    title = contents.join ' '
-    return title
-  end
-  nil
-end
-
 
 def wiki_redirect? page
   if page =~ /\s*#REDIRECT\s*(.*)$/mi
