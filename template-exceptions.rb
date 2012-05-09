@@ -11,6 +11,7 @@
 # link.  This table maps template names to list of fields.
 # The empty list represents /any field/.
 BOYCOTT_TEMPLATES = {
+  'plink' => [],
   'infobox writer' => ['website'],
   'infobox ncaa football school' => ['websiteurl'],
   'infobox cricketer biography' => ['source'],
