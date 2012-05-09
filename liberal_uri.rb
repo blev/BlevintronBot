@@ -20,18 +20,6 @@ module URI
 
     results = []
 
-    remnants = s.each_template(:redact_nested=>true) do |tem|
-      tem.each_param_non_canon do |key,value|
-        URI.liberal_extract_no_templates(value||key,results)
-      end
-    end
-
-    URI.liberal_extract_no_templates(remnants, results)
-
-    results
-  end
-
-  def self.liberal_extract_no_templates(s, results=[])
     # Redact internal wikilinks
     s.gsub!(/\[\[.*?\]\]/mi, '')
 
@@ -49,6 +37,21 @@ module URI
       s[ offset, link.size ] = ''
     end
 
+    # Bare external links are tricky, and context
+    # sensitive.  We must parse templates to get them right.
+
+    remnants = s.each_template(:redact_nested=>true) do |tem|
+      tem.each_param_non_canon do |key,value|
+        URI.liberal_extract_no_templates(value||key,results)
+      end
+    end
+
+    URI.liberal_extract_no_templates(remnants, results)
+
+    results
+  end
+
+  def self.liberal_extract_no_templates(s, results=[])
 
     while true
       match = LIBERAL_REGEX.match(s)
