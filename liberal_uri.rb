@@ -6,12 +6,62 @@
 
 require 'uri'
 
+# not ready for prime time
+EXPERIMENTAL_PARSER = false
+
 module URI
   LIBERAL_REGEX = /https?:[^\s"<>\[\]]+/
+  EXTERNAL_BRACKET_LINK_REGEX = /\[.*?\]/m
 
   def self.liberal_extract(s, schemes=nil)
-    # TODO
-    URI.extract(s,schemes)
+    unless EXPERIMENTAL_PARSER
+      return URI.extract(s,schemes)
+    end
+
+    results = []
+
+    remnants = s.each_template(:redact_nested=>true) do |tem|
+      tem.each_param_non_canon do |key,value|
+        URI.liberal_extract_no_templates(value||key,results)
+      end
+    end
+
+    URI.liberal_extract_no_templates(remnants, results)
+
+    results
+  end
+
+  def self.liberal_extract_no_templates(s, results=[])
+    # Redact internal wikilinks
+    s.gsub!(/\[\[.*?\]\]/mi, '')
+
+    # For-each bracketted external link
+    while true
+      match = EXTERNAL_BRACKET_LINK_REGEX.match(s)
+      break if match == nil
+
+      offset = match.begin(0)
+      link = match.to_s
+
+      url,title = extract_bracket_link link
+      results << url if url
+      
+      s[ offset, link.size ] = ''
+    end
+
+
+    while true
+      match = LIBERAL_REGEX.match(s)
+      break if match == nil
+
+      offset = match.begin(0)
+      url = match.to_s
+
+      results << url
+
+      s = s[ (offset+url.size) .. -1 ]
+    end
+    results
   end
 
   # RFCs 1738, 2396, and 3986 be damned.
@@ -91,6 +141,21 @@ module URI
       return URI::HTTPS.new(scheme, userinfo, host, port, nil, path, nil, query, fragment)
     end
   end
+end
+
+
+def extract_bracket_link str
+  if (str.start_with? '[') and (str.end_with? ']')
+    innards = str[1...-1]
+    url,sep,title = innards.partition(/\s+/)
+
+    if sep == ''
+      return [innards,nil]
+    else
+      return [url,title]
+    end
+  end
+  nil
 end
 
 
