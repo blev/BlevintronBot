@@ -110,7 +110,7 @@ class Template
     contents = str[2 .. -3]
 
     if body_with_nested_templates_redacted
-      contents_skeleton = body_with_nested_templates_redacted[ first+2 .. last-2 ]
+      contents_skeleton = body_with_nested_templates_redacted[ first+2 .. last-1 ]
     else
       contents_skeleton = contents.redact_all_templates
     end
