@@ -2,13 +2,42 @@
 
 require 'db'
 
-dir = ARGV[0]
+files = []
+
+n = 0
+
+# Each parameter specifies an article, as...
+ARGV.each do |spec|
+  # ...a directory containing text files...
+  if File.directory? spec
+    files += Dir[ "#{spec}/*.before" ]
+
+  # ...a single filename...
+  elsif File.readable? spec
+    files << spec
+
+  # ...or the name of an article on wikipedia
+  else
+    body,date = retrieve_article spec
+    if body
+      filename = "#{ ENV['TMPDIR'] || '/tmp' }/tmp#{n}.wikitext"
+      n += 1
+
+      File.atomic_create filename do |fout|
+        $log.puts "Saving #{spec} => #{filename}"
+        fout.puts body
+      end
+
+      files << filename
+    end
+  end
+end
 
 total_time_old = 0
 total_time_new = 0
 n = 0
 
-Dir[ "#{dir}/*.before" ].sort.each do |file|
+files.sort.each do |file|
   corpus = File.read file
 
   begin
