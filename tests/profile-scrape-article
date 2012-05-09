@@ -11,6 +11,7 @@ bad_pages = [
   '1998 FIFA World Cup qualification (UEFA)',
   'Statewide opinion polling for the Republican Party presidential primaries, 2012',
   'Opinion polling for the United States House of Representatives elections, 2010',
+  'List of England international footballers (alphabetical)',
   ]
 
 bad_pages.each do |article|
