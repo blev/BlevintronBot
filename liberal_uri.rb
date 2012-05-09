@@ -45,7 +45,7 @@ module URI
 
       url,title = extract_bracket_link link
       results << url if url
-      
+
       s[ offset, link.size ] = ''
     end
 
@@ -147,7 +147,7 @@ end
 def extract_bracket_link str
   if (str.start_with? '[') and (str.end_with? ']')
     innards = str[1...-1]
-    url,sep,title = innards.partition(/\s+/)
+    url,sep,title = innards.partition(/\s+/m)
 
     if sep == ''
       return [innards,nil]
