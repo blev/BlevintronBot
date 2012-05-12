@@ -398,7 +398,6 @@ class Link
     unless is_new?
       last_try = @attempts.last.code
       unless (last_try =~ /^2\d\d$/) or (last_try =~ /^3\d\d$/)
-        $log.print "(skip-head) "
         skip_head = true
       end
     end
