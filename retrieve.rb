@@ -451,53 +451,60 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
   begin
     reconnect(uri, http_in) do |http|
 
-      # Try HTTP HEAD once, since it might be fast.
-      begin
-        old_connect_timeout = http.open_timeout
-        if OVERRIDE_HTTP_CONNECT_TIMEOUT
-          http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
-        end
-        old_read_timeout = http.read_timeout
-        if OVERRIDE_HTTP_READ_TIMEOUT
-          http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
-        end
+      $log.print "HEAD #{uri.pretty} " unless silent
+      numAttempts = 0
 
+      # Try HTTP HEAD first, since it might be fast.
+      # Don't bother HTTP HEAD on things that look dynamic
+      unless uri.query and uri.query != ''
 
-
-        req = Net::HTTP::Head.new uri.request_uri
-        req['User-Agent'] = HONEST_USER_AGENT
-        req['Host'] = uri.host.downcase
-        req['Connection'] = 'Keep-Alive'
-
-        extra_headers.each do |k,v|
-          req[k] = v
-        end
-
-        $log.print "HEAD #{uri.pretty} " unless silent
-        http.start unless http.started?
-        http.request req do |resp|
-          if resp.code !~ /^4\d\d$/ and resp.code !~ /^5\d\d$/
-            $log.puts resp.code unless silent
-            return head_parse_response uri, resp
+        begin
+          old_connect_timeout = http.open_timeout
+          if OVERRIDE_HTTP_CONNECT_TIMEOUT
+            http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
+          end
+          old_read_timeout = http.read_timeout
+          if OVERRIDE_HTTP_READ_TIMEOUT
+            http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
           end
 
-          $log.print "(#{resp.code}) " unless silent
-        end
-      rescue Exception => e
-        $log.puts "Exception while retrieving head: #{e}"
-        if HTTP_NO_RETRY_ERRORS.include? e.to_s
-          return ['exception', e, nil]
-        end
 
-        try_again = true
 
-      ensure
-        http.read_timeout = old_read_timeout
-        http.open_timeout = old_connect_timeout
+          req = Net::HTTP::Head.new uri.request_uri
+          req['User-Agent'] = HONEST_USER_AGENT
+          req['Host'] = uri.host.downcase
+          req['Connection'] = 'Keep-Alive'
+
+          extra_headers.each do |k,v|
+            req[k] = v
+          end
+
+          numAttempts += 1
+
+          http.start unless http.started?
+          http.request req do |resp|
+            if resp.code !~ /^4\d\d$/ and resp.code !~ /^5\d\d$/
+              $log.puts resp.code unless silent
+              return head_parse_response uri, resp
+            end
+
+            $log.print "(#{resp.code}) " unless silent
+          end
+        rescue Exception => e
+          $log.puts "Exception while retrieving head: #{e}"
+          if HTTP_NO_RETRY_ERRORS.include? e.to_s
+            return ['exception', e, nil]
+          end
+
+          try_again = true
+
+        ensure
+          http.read_timeout = old_read_timeout
+          http.open_timeout = old_connect_timeout
+        end
       end
 
       # Retry on HTTP error
-      numAttempts = 1
       while numAttempts < MAX_HTTP_ATTEMPTS
         numAttempts += 1
         if numAttempts > 1
@@ -525,6 +532,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
             req[k] = v
           end
 
+          http.start unless http.started?
           http.request req do |resp|
             $log.puts resp.code unless silent
             return head_parse_response uri, resp
