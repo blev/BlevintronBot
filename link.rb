@@ -65,7 +65,7 @@ class RetrievalAttempt
       return true
 
     when Timeout::Error
-      @code = 'connection timeout'
+      @code = 'read timeout'
       return true
 
     when Errno::ECONNREFUSED

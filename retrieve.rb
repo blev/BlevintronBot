@@ -193,6 +193,11 @@ def decode_response_body resp
         return nil
 
       ensure
+        # TODO sometimes this line
+        # will print an error message to
+        # stderr, then we perpetually
+        # receive the 'buffered IO syswrite'
+        # warning.  Harmless, but annoying.
         gzin.close unless gzin == nil
       end
     end
@@ -493,7 +498,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
             $log.print "(#{resp.code}) " unless silent
           end
         rescue Exception => e
-          $log.puts "Exception while retrieving head: #{e}"
+          $log.puts e.to_s
           if HTTP_NO_RETRY_ERRORS.include? e.to_s
             return ['exception', e, nil]
           end
@@ -541,7 +546,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
           end
 
         rescue Exception => e
-          $log.puts "Exception while retrieving head: #{e}"
+          $log.puts e.to_s
           err = e.to_s.sub(/:.*$/m, '')
           unless HTTP_IDEMPOTENT_RETRY_ERRORS.include? err
             return ['exception', e, nil]
