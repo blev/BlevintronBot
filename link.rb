@@ -394,7 +394,16 @@ class Link
       'Referer'    => article2uri(@users.first || 'Hello world program')
     }
 
-    code, location, cookie = retrieve_head uri, http, custom_headers, :silent
+    skip_head = false
+    unless is_new?
+      last_try = @attempts.last.code
+      unless (last_try =~ /^2\d\d$/) or (last_try =~ /^3\d\d$/)
+        $log.print "(skip-head) "
+        skip_head = true
+      end
+    end
+
+    code, location, cookie = retrieve_head uri, http, custom_headers, :silent, skip_head
 
     case code
     when 'exception'

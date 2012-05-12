@@ -445,7 +445,7 @@ end
 #   [http-status-code, location,         cookie]
 #   ['exception',      exception-object, nil]
 #   ['other',          nil,              nil]
-def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
+def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=false)
   return ['other',nil,nil] if uri==nil
 
   begin
@@ -454,9 +454,11 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false)
       $log.print "HEAD #{uri.pretty} " unless silent
       numAttempts = 0
 
-      # Try HTTP HEAD first, since it might be fast.
       # Don't bother HTTP HEAD on things that look dynamic
-      unless uri.query and uri.query != ''
+      skip_head ||= (uri.query and uri.query != '')
+
+      # Try HTTP HEAD first, since it might be fast.
+      unless skip_head
 
         begin
           old_connect_timeout = http.open_timeout
