@@ -424,7 +424,7 @@ class Editor
 
   def receive_all_links q
     n = 1
-    while true
+    while n<15
       receive_links q
       break if @scraper_is_done
       $log.puts "Waiting for scraper to send the done token..."
