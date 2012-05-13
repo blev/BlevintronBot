@@ -56,12 +56,14 @@ end
 
 def scraper_task
   $log = TMux.new($log, 0)
-  $log.puts "Startup scraper: #{Time.now}"
+  startup_time = Time.now
+  $log.puts "Startup scraper: #{startup_time}"
   save_pid SCRAPER_PID_FILE
   scraper = Scraper.load DB_DIR
   trap_signals
 
   until $cancel
+    $log.puts "Uptime: #{Time.now - startup_time}"
     scraper.print_scrape_stats
 
     # Keep CPU, Network utilization low
@@ -101,7 +103,8 @@ end
 
 def editor_task
   $log = TMux.new($log, TMUX_COLUMN_WRAP)
-  $log.puts "Startup editor: #{Time.now}"
+  startup_time = Time.now
+  $log.puts "Startup editor: #{startup_time}"
   save_pid EDITOR_PID_FILE
   editor  = Editor.load DB_DIR
   trap_signals
@@ -109,6 +112,7 @@ def editor_task
   edits_allowed = true
   until $cancel
 
+    $log.puts "Uptime: #{Time.now - startup_time}"
     editor.print_edit_stats
 
     # Contact my emergency shutdown page.
