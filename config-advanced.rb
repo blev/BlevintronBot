@@ -98,7 +98,7 @@ HIGH_TRAFFIC_SCRAPE_PERIOD = 10.seconds
 # - at most 1 edit / N seconds during low traffic
 LOW_TRAFFIC_EDIT_PERIOD = 10.seconds
 # - at most 1 edit / N seconds during high traffic
-HIGH_TRAFFIC_EDIT_PERIOD = 20.seconds
+HIGH_TRAFFIC_EDIT_PERIOD = 15.seconds
 
 # Maximum number of distinct links to correct
 # in a single edit to a single article.
