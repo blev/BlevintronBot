@@ -100,10 +100,14 @@ class Editor
     # Select those links we will fix
     if MAX_LINKS_PER_EDIT
       contributing_bad_links = bad_links.take MAX_LINKS_PER_EDIT
+      remaining_links = bad_links.drop MAX_LINKS_PER_EDIT
 
     else
       contributing_bad_links = bad_links.dup
+      remaining_links = []
     end
+
+    $log.puts "* I will fix #{contributing_bad_links.size} links in '#{name}'"
 
     # Lookup article history to determine when each link
     # was added to the article.
@@ -133,7 +137,6 @@ class Editor
     # Try to fix each problem link
     new_body = body
     changes = []
-    remaining_links = []
     archived_links = []
     broken_links = []
     total_archived = 0

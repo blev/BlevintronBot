@@ -45,7 +45,7 @@ class Editor
     $log.puts
     $log.puts
     $log.puts "Edit #{ Time.now }"
-    $log.puts "  Article '#{name}' has problem links"
+    $log.puts "  Article '#{name}' has problem ~#{ @bad[name].size} links"
 
     # debugging limit.
     if LIMIT_EDIT_ARTICLES
