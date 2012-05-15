@@ -112,6 +112,10 @@ class RetrievalAttempt
   end
 
   def is_timeout_error?
+    (@code == 'connection timeout') or (@code == 'read timeout')
+  end
+
+  def is_connection_timeout?
     @code == 'connection timeout'
   end
 
@@ -158,6 +162,10 @@ class Link
   def articles
     @users.uniq!
     @users
+  end
+
+  def is_connection_timeout?
+    @attempts.last.is_connection_timeout?
   end
 
   def next_check_time(base = nil)

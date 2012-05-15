@@ -110,19 +110,24 @@ private
     end
 
     $log.puts "#{group_scheme}://#{group_host}:#{group_port}"
+
+    # If there is a timeout on connect,
+    # then this affects all members of this
+    # group equally.  No point in checking each.
+    connection_timeout = false
+
     reconnect(firstURI) do |http|
       # Each link in this group
       until ready.empty?
         break if $cancel
 
-        # Still in the same group?
         if pathological_url? ready.first.url
           $log.puts "WTF: '#{ready.first.url}'"
           raise(Exception.new 'malformed url')
         end
 
+        # Still in the same group?
         uri = URI.liberal_parse ready.first.url
-
         break if uri.scheme != group_scheme
         break if uri.host.downcase != group_host
         break if uri.port != group_port
@@ -131,11 +136,20 @@ private
         link = ready.shift
         fragment_dirty! link.fragno
 
+
         if robottxt_disallow?(uri, http)
           link.observation(RetrievalAttempt.norobots)
 
+        elsif connection_timeout
+          $log.puts "  #{uri.request_uri} (infer connection timeout)"
+          link.observation( RetrievalAttempt.exc 'connection timeout' )
+
         else
           link.check! http
+
+          # If this link experienced a connection timeout,
+          # then all other links in this group will too.
+          connection_timeout = link.is_connection_timeout?
         end
 
         nChecked += 1
