@@ -36,11 +36,26 @@ HTTP_RETRY_ERRORS = ['Connection reset by peer', 'end of file reached', 'Broken 
 HTTP_IDEMPOTENT_RETRY_ERRORS = HTTP_RETRY_ERRORS + ['wrong status line']
 
 # A set of errors for which retry cannot help
-HTTP_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known', 'Connection timed out - connect(2)']
+HTTP_HEAD_NO_RETRY_ERRORS = ['getaddrinfo: Name or service not known', 'Connection timed out - connect(2)']
+
+# A set of errors for which retry cannot help
+HTTP_NO_RETRY_ERRORS = HTTP_HEAD_NO_RETRY_ERRORS + ['execution expired']
 
 # MediaWikia API errors
 API_RETRY_ERRORS = ['unknownerror', 'ratelimited', 'readonly', 'hookaborted']
 
+
+# Apply the default HTTP headers to this request
+def req_headers(req, uri, extra_headers={})
+  req['User-Agent'] = HONEST_USER_AGENT
+  req['Host'] = uri.host.downcase
+  req['Accept-Encoding'] = 'gzip, identity'
+  req['Connection'] = 'Keep-Alive'
+
+  extra_headers.each do |k,v|
+    req[k] = v
+  end
+end
 
 # A wonderful method for scoped connections.
 def reconnect(uri, http=nil)
@@ -221,20 +236,21 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
           http.finish
           sleep HTTP_RETRY_TIMEOUT
           $log.puts " - http attempt #{numAttempts}"
-          http.start
         end
         try_again = false
 
+        old_connect_timeout = http.open_timeout
+        old_read_timeout = http.read_timeout
         begin
-          req = Net::HTTP::Get.new uri.request_uri
-          req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host.downcase
-          req['Accept-Encoding'] = 'gzip, identity'
-          req['Connection'] = 'Keep-Alive'
-
-          extra_headers.each do |k,v|
-            req[k] = v
+          if OVERRIDE_HTTP_CONNECT_TIMEOUT
+            http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
           end
+          if OVERRIDE_HTTP_READ_TIMEOUT
+            http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
+          end
+
+          req = Net::HTTP::Get.new uri.request_uri
+          req_headers(req, uri, extra_headers)
 
           $log.print "GET #{uri.pretty} " unless silent
           http.start unless http.started?
@@ -285,6 +301,10 @@ def retrieve_page(uri, http_in=nil, extra_headers={}, silent=false)
           $log.puts "Exception while retrieving page: #{e}"
           err = e.to_s.sub(/:.*$/m, '')
           try_again = true if HTTP_IDEMPOTENT_RETRY_ERRORS.include? err
+
+        ensure
+          http.read_timeout = old_read_timeout
+          http.open_timeout = old_connect_timeout
         end
 
         break unless try_again
@@ -309,21 +329,12 @@ def retrieve_post(uri, args, http_in=nil, extra_headers={})
           http.finish
           sleep HTTP_RETRY_TIMEOUT
           $log.puts " - http attempt #{numAttempts}"
-          http.start
         end
         try_again = false
 
         begin
           req = Net::HTTP::Post.new uri.request_uri
-          req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host.downcase
-          req['Accept-Encoding'] = 'gzip, identity'
-          req['Connection'] = 'Keep-Alive'
-
-          extra_headers.each do |k,v|
-            req[k] = v
-          end
-
+          req_headers(req,uri,extra_headers)
 
           req.set_post_data args
 
@@ -465,26 +476,18 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
       # Try HTTP HEAD first, since it might be fast.
       unless skip_head
 
+        old_connect_timeout = http.open_timeout
+        old_read_timeout = http.read_timeout
         begin
-          old_connect_timeout = http.open_timeout
           if OVERRIDE_HTTP_CONNECT_TIMEOUT
             http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
           end
-          old_read_timeout = http.read_timeout
           if OVERRIDE_HTTP_READ_TIMEOUT
             http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
           end
 
-
-
           req = Net::HTTP::Head.new uri.request_uri
-          req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host.downcase
-          req['Connection'] = 'Keep-Alive'
-
-          extra_headers.each do |k,v|
-            req[k] = v
-          end
+          req_headers(req,uri,extra_headers)
 
           numAttempts += 1
 
@@ -499,7 +502,7 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
           end
         rescue Exception => e
           $log.puts e.to_s
-          if HTTP_NO_RETRY_ERRORS.include? e.to_s
+          if HTTP_HEAD_NO_RETRY_ERRORS.include? e.to_s
             return ['exception', e, nil]
           end
 
@@ -511,33 +514,33 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
         end
       end
 
-      # Retry on HTTP error
+      # Retry with a GET on 4xx and 5xx errors.
+      # HTTP 405 means we the server doesn't support HEAD for this URL
+      # A server /should/ return 405 whenever HEAD doesn't match GET,
+      # but many don't.  Thus, we don't trust 4xx/5xx on HEAD.
+
       while numAttempts < MAX_HTTP_ATTEMPTS
         numAttempts += 1
         if numAttempts > 1
           http.finish if http.started?
           sleep HTTP_RETRY_TIMEOUT
           $log.puts " - http attempt #{numAttempts}"
-          http.start
         end
         try_again = false
 
+        old_connect_timeout = http.open_timeout
+        old_read_timeout = http.read_timeout
         begin
-          # Retry with a GET on 4xx and 5xx errors.
-          # HTTP 405 means we the server doesn't support HEAD for this URL
-          # A server /should/ return 405 whenever HEAD doesn't match GET,
-          # but many don't.  Thus, we don't trust 4xx/5xx on HEAD.
+          if OVERRIDE_HTTP_CONNECT_TIMEOUT
+            http.open_timeout = OVERRIDE_HTTP_CONNECT_TIMEOUT
+          end
+          if OVERRIDE_HTTP_READ_TIMEOUT
+            http.read_timeout = OVERRIDE_HTTP_READ_TIMEOUT
+          end
 
           # Try again with HTTP GET
           req = Net::HTTP::Get.new uri.request_uri
-          req['User-Agent'] = HONEST_USER_AGENT
-          req['Host'] = uri.host.downcase
-          req['Connection'] = 'Keep-Alive'
-          req['Accept-Encoding'] = 'gzip, identity'
-
-          extra_headers.each do |k,v|
-            req[k] = v
-          end
+          req_headers(req,uri,extra_headers)
 
           http.start unless http.started?
           http.request req do |resp|
@@ -553,6 +556,10 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
           end
 
           try_again = true
+
+        ensure
+          http.read_timeout = old_read_timeout
+          http.open_timeout = old_connect_timeout
         end
 
         break unless try_again

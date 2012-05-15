@@ -53,8 +53,9 @@ MIN_LINK_FAILURES = 3
 #   once every N seconds
 LINK_TRIAL_PERIOD = 2.days
 
-# Optionally, you may override the connect timeout
-# used during link checking.
+# Optionally, you may override the connect and
+# read timeouts.  These apply to retrieve_head
+# and retrieve_page.
 # Set this to nil if you do not want to override
 OVERRIDE_HTTP_CONNECT_TIMEOUT = 45.seconds
 # And the HTTP read timeout
