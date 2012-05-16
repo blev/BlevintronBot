@@ -409,3 +409,75 @@ class URI::HTTP
   end
 end
 
+def plural(n,noun)
+  # singular
+  return "#{n} #{noun}" if n == 1
+
+  if (noun.end_with? 's') or (noun.end_with? 'sh') or (noun.end_with? 'ch')
+    return "#{n} #{noun}es"
+
+  else
+    return "#{n} #{noun}s"
+  end
+end
+
+
+def comma_conjoin(array)
+  last = array.pop
+
+  if array.empty?
+    return last
+
+  else
+    return "#{array.join ', '} and #{last}"
+  end
+end
+
+def format_duration(f)
+  pieces = []
+
+  if f < 0
+    pieces << "(negative)"
+    f = -f
+  end
+
+  include_seconds = (f < 1.hours)
+
+  if f > 1.years
+    yy = (f/1.years).floor.to_i
+    pieces << plural(yy,"year")
+    f -= yy.years
+  end
+
+  if f > 1.months
+    mm = (f/1.months).floor.to_i
+    pieces << plural(mm,"month")
+    f -= mm.months
+  end
+
+  if f > 1.days
+    dd = (f/1.days).floor.to_i
+    pieces << plural(dd,"day")
+    f -= dd.days
+  end
+
+  if f > 1.hours
+    hh = (f/1.hours).floor.to_i
+    pieces << plural(hh,"hour")
+    f -= hh.hours
+  end
+
+  if f > 1.minutes
+    mm = (f/1.minutes).floor.to_i
+    pieces << plural(mm,"minute")
+    f -= mm.minutes
+  end
+
+  ss = f.floor.to_i
+  if ss != 0 and include_seconds
+    pieces << plural(ss,"second")
+  end
+
+  comma_conjoin pieces
+end
+

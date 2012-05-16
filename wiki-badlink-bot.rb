@@ -63,7 +63,7 @@ def scraper_task
   trap_signals
 
   until $cancel
-    $log.puts "Uptime: #{Time.now - startup_time}"
+    $log.puts "Uptime: #{format_duration(Time.now - startup_time)}"
     scraper.print_scrape_stats
 
     # Keep CPU, Network utilization low
@@ -112,7 +112,7 @@ def editor_task
   edits_allowed = true
   until $cancel
 
-    $log.puts "Uptime: #{Time.now - startup_time}"
+    $log.puts "Uptime: #{format_duration(Time.now - startup_time)}"
     editor.print_edit_stats
 
     # Contact my emergency shutdown page.

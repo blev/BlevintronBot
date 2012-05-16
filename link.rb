@@ -356,14 +356,8 @@ class Link
   end
 
   def trial_dates
-    atx = @attempts.map { |attempt| attempt.date.informal_recent }
-    last = atx.pop
-
-    if atx.empty?
-      return last
-    else
-      return "#{atx.join ', '} and #{last}"
-    end
+    dates = @attempts.map { |attempt| attempt.date.informal_recent }
+    comma_conjoin dates
   end
 
   def apologize_brief
