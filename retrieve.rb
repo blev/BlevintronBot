@@ -785,6 +785,6 @@ def retrieve_article_size article, http_in=nil
     $log.puts "- exception in retrieve_article_size: #{e} #{e.backtrace}"
   end
 
-  -1
+  nil
 end
 

@@ -275,7 +275,8 @@ private
     end
 
     if SAVE_EDITS_TO_USERSPACE
-      if MOCK_EDIT_SIZE_LIMIT > (retrieve_article_size MOCK_EDIT_ARTICLE)
+      sz = (retrieve_article_size MOCK_EDIT_ARTICLE) || MOCK_EDIT_SIZE_LIMIT
+      if MOCK_EDIT_SIZE_LIMIT > sz
         diffs = compute_diffs(old_body,new_body)
         if diffs.size > 0
           Api.session( BOT_USERNAME, BOT_PASSWORD ) do |session|
