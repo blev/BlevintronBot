@@ -491,7 +491,16 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
 
           numAttempts += 1
 
-          http.start unless http.started?
+          begin
+            http.start unless http.started?
+          rescue Exception => e
+            if e.to_s == "execution expired"
+              return ['exception', 'connection timeout', nil]
+            else
+              return ['exception', e, nil]
+            end
+          end
+
           http.request req do |resp|
             if resp.code !~ /^4\d\d$/ and resp.code !~ /^5\d\d$/
               $log.puts resp.code unless silent
@@ -501,8 +510,9 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
             $log.print "(#{resp.code}) " unless silent
           end
         rescue Exception => e
-          $log.puts e.to_s
-          if HTTP_HEAD_NO_RETRY_ERRORS.include? e.to_s
+          msg = e.to_s
+          $log.puts msg
+          if HTTP_HEAD_NO_RETRY_ERRORS.include? msg
             return ['exception', e, nil]
           end
 
@@ -542,7 +552,16 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
           req = Net::HTTP::Get.new uri.request_uri
           req_headers(req,uri,extra_headers)
 
-          http.start unless http.started?
+          begin
+            http.start unless http.started?
+          rescue Exception => e
+            if e.to_s == 'execution expired'
+              return ['exception', 'connection timeout', nil]
+            else
+              return ['exception', e, nil]
+            end
+          end
+
           http.request req do |resp|
             $log.puts resp.code unless silent
             return head_parse_response uri, resp
@@ -551,7 +570,10 @@ def retrieve_head(uri, http_in=nil, extra_headers={}, silent=false, skip_head=fa
         rescue Exception => e
           $log.puts e.to_s
           err = e.to_s.sub(/:.*$/m, '')
-          unless HTTP_IDEMPOTENT_RETRY_ERRORS.include? err
+          if err == 'execution expired'
+            return ['exception', 'read timeout', nil]
+
+          elsif not HTTP_IDEMPOTENT_RETRY_ERRORS.include? err
             return ['exception', e, nil]
           end
 
