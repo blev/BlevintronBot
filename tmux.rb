@@ -80,17 +80,18 @@ private
 
   def flush_prefix line
     # Break at last white space
-    col = line.rindex(/\s+/, @width)
+    choices = [line.rindex(/\s+/, @width)].compact
 
-    # Failing that...
-    unless col
-      # Break /after/ last forward slash
-      col = line.rindex(/\//, @width)
-      col += 1 if col
+    # Break /after/ last forward slash, hyphen, ampersand, question mark
+    col = line.rindex(/[\/&\?-]/, @width)
+    choices << (col+1) if col
+
+    if choices.empty?
+      # Failing that... just break
+      col ||= @width
+    else
+      col = choices.max
     end
-
-    # Failing that... just break
-    col ||= @width
 
     before = line[0 ... col] + "\n"
     write_indent before
