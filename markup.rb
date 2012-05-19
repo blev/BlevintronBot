@@ -88,13 +88,13 @@ def try_parse_date ad
   # Guh... which format
   # - 9 Mar 2012?
   if ad =~ /^(\d{1,2})\s+([a-z]+),?\s+(\d{4})/i
-    $log.puts "IMPLICIT preferred date format: dmy"
+    $log.puts "IMPLICIT dmy preference"
     Time.implicit_preferred_format = 'dmy'
     return Time.utc( $3.to_i, $2[0..2].downcase, $1.to_i )
 
   # - Mar 9, 2012?
   elsif ad =~ /^([a-z]+)\s+(\d{1,2}),?\s+(\d{4})/i
-    $log.puts "IMPLICIT preferred date format: mdy"
+    $log.puts "IMPLICIT mdy preference"
     Time.implicit_preferred_format = 'mdy'
     return Time.utc( $3.to_i, $1[0..2].downcase, $2.to_i )
 

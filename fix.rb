@@ -87,11 +87,11 @@ class Editor
     # declares a preferred date format.
     body.each_template do |tl|
       if tl.is_use_dmy_dates?
-        $log.puts "EXPLICIT preferred date format: dmy"
+        $log.puts "EXPLICIT dmy preference"
         Time.explicit_preferred_format = 'dmy'
         break
       elsif tl.is_use_mdy_dates?
-        $log.puts "EXPLICIT preferred date format: mdy"
+        $log.puts "EXPLICIT mdy preference"
         Time.explicit_preferred_format = 'mdy'
         break
       end
