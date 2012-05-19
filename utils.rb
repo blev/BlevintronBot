@@ -413,7 +413,7 @@ def plural(n,noun)
   # singular
   return "#{n} #{noun}" if n == 1
 
-  if (noun.end_with? 's') or (noun.end_with? 'sh') or (noun.end_with? 'ch')
+  if (noun.end_with? 's') or (noun.end_with? 'sh') or (noun.end_with? 'ch') or (noun.end_with? 'x')
     return "#{n} #{noun}es"
 
   else
@@ -422,14 +422,14 @@ def plural(n,noun)
 end
 
 
-def comma_conjoin(array)
+def comma_conjoin(array, conjunction='and')
   last = array.pop
 
   if array.empty?
     return last
 
   else
-    return "#{array.join ', '} and #{last}"
+    return "#{array.join ', '} #{conjunction} #{last}"
   end
 end
 
