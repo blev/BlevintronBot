@@ -166,7 +166,7 @@ MIN_BAD_LINK_POOL =  5000
 ROBOTSTXT_TTL = 1.days
 
 # How many domains should we cache, at max
-MAX_ROBOTSTXT_CACHE_SIZE = 3000 # hosts
+MAX_ROBOTSTXT_CACHE_SIZE = 5000 # hosts
 
 # When evicting cache items, stop evicting if
 # we get it down to this number.
